@@ -1,0 +1,1252 @@
+/* ==========================================================================
+   CSS Reset & Base Variables
+   ========================================================================== */
+
+:root[data-theme="dark"] {
+  /* UI Colors - Dark Theme */
+  --bg-app: #0f172a;
+  --bg-editor: rgba(30, 41, 59, 0.7);
+  --bg-card: rgba(15, 23, 42, 0.6);
+  --border-ui: rgba(255, 255, 255, 0.08);
+  --border-focus: #6366f1;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-inverse: #0f172a;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --success: #10b981;
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --preview-bg: #090d16;
+  
+  /* Resume Page Colors (Strict B&W for ATS friendly) */
+  --resume-bg: #ffffff;
+  --resume-text: #000000;
+  --resume-text-muted: #222222;
+  --resume-divider: #000000;
+}
+
+:root[data-theme="light"] {
+  /* UI Colors - Light Theme */
+  --bg-app: #f1f5f9;
+  --bg-editor: rgba(255, 255, 255, 0.85);
+  --bg-card: rgba(241, 245, 249, 0.9);
+  --border-ui: rgba(0, 0, 0, 0.08);
+  --border-focus: #4f46e5;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-inverse: #f8fafc;
+  --accent: #4f46e5;
+  --accent-hover: #3730a3;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --success: #10b981;
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+  --preview-bg: #cbd5e1;
+  
+  /* Resume Page Colors (Strict B&W for ATS friendly) */
+  --resume-bg: #ffffff;
+  --resume-text: #000000;
+  --resume-text-muted: #222222;
+  --resume-divider: #000000;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   Header Styles
+   ========================================================================== */
+
+.app-header {
+  height: 70px;
+  background-color: var(--bg-editor);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-ui);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 100;
+  box-shadow: var(--glass-shadow);
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-logo i {
+  font-size: 24px;
+  color: var(--accent);
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.4));
+}
+
+.header-logo h1 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-ui);
+  margin: 0 4px;
+}
+
+/* Buttons UI */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  color: var(--text-inverse);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+.btn-secondary {
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  border-color: var(--border-ui);
+}
+
+.btn-secondary:hover {
+  background-color: var(--border-ui);
+  border-color: var(--text-muted);
+}
+
+.btn-add {
+  width: 100%;
+  padding: 10px;
+  margin-top: 12px;
+  background-color: rgba(99, 102, 241, 0.08);
+  color: var(--accent);
+  border: 1px dashed var(--accent);
+  font-weight: 600;
+  border-radius: 8px;
+  justify-content: center;
+}
+
+.btn-add:hover {
+  background-color: rgba(99, 102, 241, 0.15);
+}
+
+.btn-danger-link {
+  color: var(--danger);
+  border: none;
+  background: none;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-danger-link:hover {
+  color: var(--danger-hover);
+  text-decoration: underline;
+}
+
+.text-danger {
+  color: var(--danger) !important;
+}
+
+.text-danger:hover {
+  background-color: rgba(239, 68, 68, 0.08) !important;
+}
+
+.btn-icon {
+  background: none;
+  border: 1px solid var(--border-ui);
+  color: var(--text-main);
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 16px;
+}
+
+.btn-icon:hover {
+  background-color: var(--border-ui);
+  transform: scale(1.05);
+}
+
+/* Toggle Themes */
+.icon-light { display: none; }
+.icon-dark { display: block; }
+[data-theme="light"] .icon-light { display: block; }
+[data-theme="light"] .icon-dark { display: none; }
+
+/* ==========================================================================
+   Main Layout & Editor Panel (Form)
+   ========================================================================== */
+
+.app-main {
+  flex: 1;
+  display: flex;
+  overflow-y: auto;
+  min-height: calc(100vh - 70px);
+  min-height: 0;
+}
+
+.editor-panel {
+  width: 45%;
+  min-width: 420px;
+  max-width: 600px;
+  height: 100%;
+  background-color: var(--bg-editor);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-right: 1px solid var(--border-ui);
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Accordion Component */
+.accordion-item {
+  border: 1px solid var(--border-ui);
+  border-radius: 12px;
+  background-color: var(--bg-card);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+  user-select: none;
+  position: relative;
+  transition: background-color 0.2s ease;
+  gap: 12px;
+  font-size: 15px;
+}
+
+.accordion-header i:first-child {
+  color: var(--accent);
+  font-size: 16px;
+  width: 20px;
+}
+
+.accordion-header:hover {
+  background-color: var(--border-ui);
+}
+
+.accordion-arrow {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+  font-size: 12px;
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 20px;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+/* Accordion Active States */
+.accordion-item.active {
+  border-color: var(--accent);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.08);
+}
+
+.accordion-item.active .accordion-header {
+  border-bottom: 1px solid var(--border-ui);
+}
+
+.accordion-item.active .accordion-arrow {
+  transform: rotate(180deg);
+}
+
+.accordion-item.active .accordion-content {
+  max-height: 2500px; /* High value for nested sub-sections */
+  padding: 20px;
+  overflow-y: visible;
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.required {
+  color: var(--danger);
+  margin-left: 2px;
+  font-weight: bold;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  padding: 10px 14px;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  border: 1px solid var(--border-ui);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.form-group input.input-error,
+.form-group textarea.input-error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .grid-2, .grid-3 {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+}
+
+/* Sub sections inside education */
+.education-sub-section {
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+.sub-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-divider {
+  border: 0;
+  height: 1px;
+  background-color: var(--border-ui);
+  margin: 16px 0;
+}
+
+.section-instruction {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+/* Submit Block */
+.form-submit-container {
+  padding: 8px 0 16px 0;
+}
+
+.btn-generate-resume {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  background-color: var(--accent);
+  color: var(--text-inverse);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+  border-radius: 8px;
+  justify-content: center;
+  border: none;
+}
+
+.btn-generate-resume:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+}
+
+/* ==========================================================================
+   Dynamic Item Cards (Lists inside Accordions)
+   ========================================================================== */
+
+.dynamic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dynamic-item-card {
+  border: 1px solid var(--border-ui);
+  background-color: var(--bg-app);
+  border-radius: 8px;
+  padding: 16px;
+  position: relative;
+  transition: border-color 0.2s ease;
+}
+
+.dynamic-item-card:hover {
+  border-color: var(--text-muted);
+}
+
+/* Action controls within each card */
+.card-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-ui);
+  padding-bottom: 8px;
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.card-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-control-icon {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-control-icon:hover {
+  background-color: var(--border-ui);
+  color: var(--text-main);
+}
+
+.btn-control-icon.delete-btn:hover {
+  color: var(--danger);
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Dynamic list inside experience/project bullets */
+.bullets-editor-container {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-ui);
+}
+
+.bullet-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.bullet-row:last-child {
+  margin-bottom: 0;
+}
+
+.bullet-row input {
+  flex: 1;
+}
+
+.btn-add-bullet {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.btn-add-bullet:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   Right Preview Panel
+   ========================================================================== */
+
+.preview-panel {
+  flex: 1;
+  background-color: var(--preview-bg);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: visible;
+  transition: background-color 0.3s ease;
+}
+
+/* Zoom Control bar */
+.zoom-controls {
+  height: 48px;
+  background-color: var(--bg-editor);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-ui);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 20px;
+  z-index: 50;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.zoom-controls span {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 45px;
+  text-align: center;
+}
+
+.zoom-controls button {
+  background: none;
+  border: 1px solid var(--border-ui);
+  color: var(--text-main);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-controls button:hover {
+  background-color: var(--border-ui);
+}
+
+.zoom-controls input[type="range"] {
+  width: 150px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.btn-icon-small {
+  font-size: 12px;
+}
+
+/* Resume Canvas Container */
+.resume-scroll-container {
+  flex: 1;
+  overflow: visible !important;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* Center Wrapper for Scaling Transform */
+.resume-page-wrapper {
+  transform-origin: top center;
+  transition: transform 0.15s ease-out;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  background-color: var(--resume-bg);
+}
+
+/* ==========================================================================
+   LaTeX / ATS Minimal Resume Style (A4 Simulation)
+   ========================================================================== */
+
+.resume-page {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 18mm 18mm;
+  background-color: var(--resume-bg);
+  color: var(--resume-text);
+  font-family: 'EB Garamond', 'Georgia', 'Times New Roman', serif;
+  line-height: 1.3;
+  font-size: 10pt;
+  position: relative;
+  text-align: left;
+}
+
+/* Header LaTeX Styles */
+.resume-header {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.r-title {
+  font-size: 22pt;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+}
+
+.r-location {
+  font-size: 10.5pt;
+  margin-bottom: 6px;
+}
+
+.r-contact {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  column-gap: 14px;
+  row-gap: 4px;
+  font-size: 9.5pt;
+}
+
+.r-contact span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.icon-sep {
+  margin-right: 4px;
+  font-size: 8.5pt;
+}
+
+.r-contact a {
+  text-decoration: none;
+  border-bottom: 1px dotted var(--resume-text-muted);
+}
+
+.r-contact a:hover {
+  border-bottom-style: solid;
+}
+
+/* Section Title LaTeX Styles */
+.resume-section {
+  margin-top: 14px;
+}
+
+.section-title {
+  font-size: 11.5pt;
+  font-weight: 700;
+  letter-spacing: 0.75px;
+  margin-bottom: 1px;
+  text-transform: uppercase;
+}
+
+.section-divider {
+  height: 0.8px;
+  background-color: var(--resume-divider);
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+/* Summary Styles */
+.r-summary-text {
+  font-size: 10pt;
+  text-align: justify;
+  line-height: 1.35;
+}
+
+/* Entry Rows */
+.r-entry {
+  margin-bottom: 8px;
+}
+
+.r-entry:last-child {
+  margin-bottom: 0;
+}
+
+.r-entry-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1px;
+}
+
+.r-entry-left-bold {
+  font-weight: 700;
+  font-size: 10pt;
+}
+
+.r-entry-right-bold {
+  font-weight: 700;
+  font-size: 10pt;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.r-entry-left-italic {
+  font-style: italic;
+  font-size: 9.5pt;
+}
+
+.r-entry-right-italic {
+  font-style: italic;
+  font-size: 9.5pt;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Bullet Point Lists */
+.r-bullets {
+  margin-top: 4px;
+  margin-left: 18px;
+  list-style-type: disc;
+}
+
+.r-bullets li {
+  margin-bottom: 2px;
+  padding-left: 2px;
+  font-size: 9.5pt;
+  line-height: 1.3;
+}
+
+.r-bullets li:last-child {
+  margin-bottom: 0;
+}
+
+.r-bullets strong, 
+.r-certifications-list strong,
+.r-skills-table strong,
+.r-summary-text strong {
+  font-weight: 700;
+}
+
+/* Projects LaTeX styles */
+.r-project-title {
+  font-weight: 700;
+  font-size: 10pt;
+  text-transform: uppercase;
+}
+
+/* Skills Table LaTeX styles */
+.r-skills-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.r-skills-table td {
+  padding: 3px 0;
+  vertical-align: top;
+  font-size: 9.5pt;
+}
+
+.r-skills-cat {
+  width: 170px;
+  font-weight: 700;
+}
+
+/* Certifications LaTeX styles */
+.r-certifications-list {
+  margin-left: 18px;
+  list-style-type: disc;
+}
+
+.r-certifications-list li {
+  margin-bottom: 3px;
+  font-size: 9.5pt;
+  line-height: 1.3;
+}
+
+/* ==========================================================================
+   Responsive & UI Utilities
+   ========================================================================== */
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-ui);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+@media (max-width: 992px) {
+  .app-main {
+    flex-direction: column;
+    overflow-y: auto;
+    height: auto;
+  }
+  
+  .editor-panel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    overflow-y: visible;
+  }
+  
+  .preview-panel {
+    width: 100%;
+    height: auto;
+    min-height: 600px;
+  }
+  
+  .resume-scroll-container {
+    padding: 20px 10px;
+  }
+}
+
+/* ==========================================================================
+   Page Visibility & Mode Toggle Styles
+   ========================================================================== */
+
+/* Toggle classes for Wizard View (Editor <-> Preview) */
+.preview-only {
+  display: none !important;
+}
+
+body.show-preview .editor-only {
+  display: none !important;
+}
+
+body.show-preview .preview-only {
+  display: inline-flex !important;
+}
+
+/* Default: hide preview, center editor */
+.preview-panel {
+  display: none !important;
+}
+
+.editor-panel {
+  width: 100% !important;
+  max-width: 800px !important;
+  margin: 0 auto !important;
+  border-left: 1px solid var(--border-ui) !important;
+  border-right: 1px solid var(--border-ui) !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+/* Preview Mode: hide editor, show preview */
+body.show-preview .editor-panel {
+  display: none !important;
+}
+
+body.show-preview .preview-panel {
+  display: flex !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* Smooth Fade transition */
+@keyframes panelFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.editor-panel, .preview-panel {
+  animation: panelFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ==========================================================================
+   Print / Export CSS Rules
+   ========================================================================== */
+
+@media print {
+  html, body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .app-header, 
+  .editor-panel, 
+  .zoom-controls,
+  .btn,
+  .btn-icon,
+  .divider,
+  .modal-overlay,
+  ::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .app-main {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .preview-panel {
+    display: block !important;
+    overflow: visible !important;
+    background: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .resume-scroll-container {
+    display: block !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .resume-page-wrapper {
+    display: block !important;
+    transform: none !important; 
+    box-shadow: none !important;
+    background-color: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .resume-page {
+    border: none !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 0.5in 0.5in !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .resume-section {
+    page-break-inside: avoid !important;
+  }
+
+  /* Prevent browser from rendering the URL target after links */
+  a[href]:after {
+    content: none !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+}
+
+/* ==========================================================================
+   Resume Parser Modal Styles
+   ========================================================================== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 999;
+  display: none; /* Toggled by JS via .active class */
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-card {
+  background-color: var(--bg-editor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-ui);
+  box-shadow: var(--glass-shadow);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: modalScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes modalScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-ui);
+  padding-bottom: 12px;
+}
+
+.modal-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-header h3 i {
+  color: var(--accent);
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 24px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background-color: var(--border-ui);
+  color: var(--text-main);
+}
+
+/* Tabs */
+.modal-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-ui);
+  gap: 8px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+}
+
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* Tab Content */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+  animation: tabFadeIn 0.25s ease-out forwards;
+}
+
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* File Upload Zone */
+.file-upload-zone {
+  border: 2px dashed var(--border-ui);
+  border-radius: 12px;
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.file-upload-zone:hover, 
+.file-upload-zone.dragover {
+  border-color: var(--accent);
+  background-color: rgba(99, 102, 241, 0.04);
+}
+
+.file-icon {
+  font-size: 40px;
+  color: var(--accent);
+  margin-bottom: 4px;
+  transition: transform 0.2s ease;
+}
+
+.file-upload-zone:hover .file-icon {
+  transform: translateY(-3px);
+}
+
+.upload-headline {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.upload-subline {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.file-upload-zone input[type="file"] {
+  display: none;
+}
+
+.file-info-label {
+  margin-top: 8px;
+  font-size: 11px;
+  padding: 4px 10px;
+  background-color: var(--border-ui);
+  border-radius: 20px;
+  display: inline-block;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Action Container */
+.parser-action-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* Modal Footer */
+.modal-footer {
+  border-top: 1px solid var(--border-ui);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.parser-disclaimer {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.parser-disclaimer i {
+  color: var(--accent);
+  margin-top: 2px;
+}
+

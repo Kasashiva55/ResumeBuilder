@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Builder</title>
+  <meta name="description" content="Build and export beautiful, professional resumes matching the classic LaTeX/serif format.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+
+  <!-- PDF.js library for resume parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- App Header / Navigation -->
+  <header class="app-header">
+    <div class="header-logo">
+      <i class="fa-solid fa-file-invoice"></i>
+      <h1>Resume Builder</h1>
+    </div>
+    
+    <div class="header-actions">
+      <!-- Editor Mode Actions -->
+      <button id="btn-parse-resume" class="btn btn-secondary editor-only" title="Import and parse details from an existing resume PDF or text">
+        <i class="fa-solid fa-file-invoice"></i> Import from Resume
+      </button>
+      <button id="btn-clear" class="btn btn-secondary text-danger editor-only" title="Clear all input fields">
+        <i class="fa-solid fa-trash-can"></i> Clear Form
+      </button>
+      
+      <!-- Preview Mode Actions -->
+      <button id="btn-back" class="btn btn-secondary preview-only" title="Return to editor form">
+        <i class="fa-solid fa-arrow-left"></i> Back to Edit
+      </button>
+      <button id="btn-print" class="btn btn-primary preview-only" title="Export resume to PDF via html2pdf.js">
+        <i class="fa-solid fa-download"></i> Download PDF
+      </button>
+      
+      <div class="divider"></div>
+      
+      <!-- General Actions -->
+      <button id="btn-theme-toggle" class="btn-icon" title="Toggle Light/Dark Mode">
+        <i class="fa-solid fa-sun icon-light"></i>
+        <i class="fa-solid fa-moon icon-dark"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container Layout -->
+  <main class="app-main">
+    
+    <!-- Left Editor Panel (Form) -->
+    <form id="resume-form" class="editor-panel" onsubmit="event.preventDefault();">
+      
+      <!-- Accordion Section: Personal Info -->
+      <div class="accordion-item active">
+        <div class="accordion-header">
+          <i class="fa-solid fa-user-tie"></i>
+          <span>Basic Details</span>
+          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+        </div>
+        <div class="accordion-content">
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="p-name">Full Name <span class="required">*</span></label>
+              <input type="text" id="p-name" placeholder="Sarvesh N Hiremath" required>
+            </div>
+            <div class="form-group">
+              <label for="p-location">Location (City, State) <span class="required">*</span></label>
+              <input type="text" id="p-location" placeholder="Hubballi, Karnataka" required>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="p-phone">Phone Number <span class="required">*</span></label>
+              <input type="text" id="p-phone" placeholder="+91-6364563283" required>
+            </div>
+            <div class="form-group">
+              <label for="p-email">Email Address <span class="required">*</span></label>
+              <input type="email" id="p-email" placeholder="sarusondj@gmail.com" required>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="p-linkedin-text">LinkedIn Label</label>
+              <input type="text" id="p-linkedin-text" placeholder="LinkedIn">
+            </div>
+            <div class="form-group">
+              <label for="p-linkedin-url">LinkedIn URL <span class="required">*</span></label>
+              <input type="url" id="p-linkedin-url" placeholder="https://linkedin.com/in/username" required>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="p-github-text">GitHub Label</label>
+              <input type="text" id="p-github-text" placeholder="GitHub">
+            </div>
+            <div class="form-group">
+              <label for="p-github-url">GitHub URL <span class="required">*</span></label>
+              <input type="url" id="p-github-url" placeholder="https://github.com/username" required>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accordion Section: Summary -->
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <i class="fa-solid fa-address-card"></i>
+          <span>Professional Summary</span>
+          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+        </div>
+        <div class="accordion-content">
+          <div class="form-group">
+            <label for="p-summary">Professional Summary <span class="required">*</span></label>
+            <textarea id="p-summary" rows="4" placeholder="Brief overview of your experience, skills, and goals..." required></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accordion Section: Education (Graduation, Intermediate, School) -->
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span>Education</span>
+          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+        </div>
+        <div class="accordion-content">
+          <!-- Graduation -->
+          <div class="education-sub-section">
+            <h4 class="sub-section-title">College / Graduation</h4>
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="edu-coll-name">College Name <span class="required">*</span></label>
+                <input type="text" id="edu-coll-name" placeholder="Basaveshwar Engineering College" required>
+              </div>
+              <div class="form-group">
+                <label for="edu-coll-location">Location (City, State) <span class="required">*</span></label>
+                <input type="text" id="edu-coll-location" placeholder="Bagalkot, Karnataka" required>
+              </div>
+            </div>
+            <div class="grid-3">
+              <div class="form-group">
+                <label for="edu-coll-degree">Degree <span class="required">*</span></label>
+                <input type="text" id="edu-coll-degree" placeholder="B.E" required>
+              </div>
+              <div class="form-group">
+                <label for="edu-coll-cgpa">CGPA <span class="required">*</span></label>
+                <input type="text" id="edu-coll-cgpa" placeholder="6.20" required>
+              </div>
+              <div class="form-group">
+                <label for="edu-coll-duration">Duration (Start - End Year) <span class="required">*</span></label>
+                <input type="text" id="edu-coll-duration" placeholder="2022 - 2026" required>
+              </div>
+            </div>
+          </div>
+          
+          <hr class="form-divider">
+          
+          <!-- Intermediate -->
+          <div class="education-sub-section">
+            <h4 class="sub-section-title">Intermediate (Class XII)</h4>
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="edu-int-college">College Name <span class="required">*</span></label>
+                <input type="text" id="edu-int-college" placeholder="P. C. Jabin College" required>
+              </div>
+              <div class="form-group">
+                <label for="edu-int-location">Location (City, State) <span class="required">*</span></label>
+                <input type="text" id="edu-int-location" placeholder="Hubballi, Karnataka" required>
+              </div>
+            </div>
+            <div class="grid-3">
+              <div class="form-group">
+                <label for="edu-int-board">Board & Stream <span class="required">*</span></label>
+                <input type="text" id="edu-int-board" placeholder="KSEEB (Class XII) - PCMCs" required>
+              </div>
+              <div class="form-group">
+                <label for="edu-int-percentage">Percentage <span class="required">*</span></label>
+                <input type="text" id="edu-int-percentage" placeholder="52.2%" required>
+              </div>
+              <div class="form-group">
+                <label for="edu-int-year">Duration / Year <span class="required">*</span></label>
+                <input type="text" id="edu-int-year" placeholder="2020 - 2022" required>
+              </div>
+            </div>
+          </div>
+          
+          <hr class="form-divider">
+          
+          <!-- School -->
+          <div class="education-sub-section">
+            <h4 class="sub-section-title">School (Class X)</h4>
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="edu-sch-name">School Name <span class="required">*</span></label>
+                <input type="text" id="edu-sch-name" placeholder="Bethal English Medium School" required>
+              </div>
+              <div class="form-group">
+                <label for="edu-sch-location">Location (City, State) <span class="required">*</span></label>
+                <input type="text" id="edu-sch-location" placeholder="Hubballi, Karnataka" required>
+              </div>
+            </div>
+            <div class="grid-3">
+              <div class="form-group">
+                <label for="edu-sch-board">Board / Specification <span class="required">*</span></label>
+                <input type="text" id="edu-sch-board" placeholder="KSEEB (Class X)" required>
+              </div>
+              <div class="form-group">
+                <label for="edu-sch-percentage">Percentage <span class="required">*</span></label>
+                <input type="text" id="edu-sch-percentage" placeholder="77.92%" required>
+              </div>
+              <div class="form-group">
+                <label for="edu-sch-year">Duration / Year <span class="required">*</span></label>
+                <input type="text" id="edu-sch-year" placeholder="2019 - 2020" required>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accordion Section: Experience -->
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <i class="fa-solid fa-briefcase"></i>
+          <span>Experience</span>
+          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+        </div>
+        <div class="accordion-content">
+          <div id="experience-list" class="dynamic-list">
+            <!-- Dynamic Items Added Here -->
+          </div>
+          <button type="button" class="btn btn-add" id="btn-add-experience">
+            <i class="fa-solid fa-plus"></i> Add Experience
+          </button>
+        </div>
+      </div>
+
+      <!-- Accordion Section: Projects -->
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <i class="fa-solid fa-code"></i>
+          <span>Projects</span>
+          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+        </div>
+        <div class="accordion-content">
+          <div id="projects-list" class="dynamic-list">
+            <!-- Dynamic Items Added Here -->
+          </div>
+          <button type="button" class="btn btn-add" id="btn-add-project">
+            <i class="fa-solid fa-plus"></i> Add Project
+          </button>
+        </div>
+      </div>
+
+      <!-- Accordion Section: Technical Skills -->
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Technical Skills</span>
+          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+        </div>
+        <div class="accordion-content">
+          <p class="section-instruction">Enter custom skill headings dynamically (e.g. "Programming & DB", "Web Technologies").</p>
+          <div id="skills-list" class="dynamic-list">
+            <!-- Dynamic Items Added Here -->
+          </div>
+          <button type="button" class="btn btn-add" id="btn-add-skill">
+            <i class="fa-solid fa-plus"></i> Add Skill Category
+          </button>
+        </div>
+      </div>
+
+      <!-- Accordion Section: Certifications -->
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <i class="fa-solid fa-certificate"></i>
+          <span>Certifications</span>
+          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+        </div>
+        <div class="accordion-content">
+          <p class="section-instruction">Add your certifications. Do not specify durations or times.</p>
+          <div id="certifications-list" class="dynamic-list">
+            <!-- Dynamic Items Added Here -->
+          </div>
+          <button type="button" class="btn btn-add" id="btn-add-certification">
+            <i class="fa-solid fa-plus"></i> Add Certification
+          </button>
+        </div>
+      </div>
+
+      <!-- Generate Resume Action at the bottom of the Form -->
+      <div class="form-submit-container">
+        <button id="btn-generate" class="btn btn-generate-resume">
+          <i class="fa-solid fa-arrows-spin"></i> Generate Resume
+        </button>
+      </div>
+
+    </form>
+
+    <!-- Right Live Preview Panel -->
+    <section class="preview-panel">
+      <!-- Floating Zoom Controls -->
+      <div class="zoom-controls">
+        <button id="btn-zoom-out" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
+        <span id="zoom-value">100%</span>
+        <input type="range" id="zoom-slider" min="50" max="150" value="100" step="5">
+        <button id="btn-zoom-in" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
+        <button id="btn-zoom-reset" class="btn-icon-small" title="Reset Zoom"><i class="fa-solid fa-rotate-left"></i></button>
+      </div>
+
+      <!-- Resume Page Container -->
+      <div class="resume-scroll-container">
+        <div class="resume-page-wrapper">
+          <div id="resume-page" class="resume-page">
+            
+            <!-- Header Section -->
+            <header class="resume-header">
+              <h1 id="r-name" class="r-title">YOUR NAME</h1>
+              <div id="r-location" class="r-location">City, State</div>
+              <div class="r-contact">
+                <span id="r-phone-container"><i class="fa-solid fa-phone icon-sep"></i><span id="r-phone">+91-000000000</span></span>
+                <span id="r-email-container"><i class="fa-solid fa-envelope icon-sep"></i><a href="#" id="r-email">email@domain.com</a></span>
+                <span id="r-linkedin-container"><i class="fa-brands fa-linkedin icon-sep"></i><a href="#" target="_blank" id="r-linkedin">LinkedIn</a></span>
+                <span id="r-github-container"><i class="fa-brands fa-github icon-sep"></i><a href="#" target="_blank" id="r-github">GitHub</a></span>
+              </div>
+            </header>
+
+            <!-- Summary Section -->
+            <section class="resume-section" id="rs-summary">
+              <h2 class="section-title">SUMMARY</h2>
+              <div class="section-divider"></div>
+              <p id="r-summary" class="r-summary-text">
+                Summary details...
+              </p>
+            </section>
+
+            <!-- Education Section -->
+            <section class="resume-section" id="rs-education">
+              <h2 class="section-title">EDUCATION</h2>
+              <div class="section-divider"></div>
+              <div id="r-education" class="r-education-entries">
+                <!-- College, Intermediate, School details will go here -->
+              </div>
+            </section>
+
+            <!-- Experience Section -->
+            <section class="resume-section" id="rs-experience">
+              <h2 class="section-title">EXPERIENCE</h2>
+              <div class="section-divider"></div>
+              <div id="r-experience" class="r-experience-entries">
+                <!-- Dynamic Experience lists -->
+              </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section class="resume-section" id="rs-projects">
+              <h2 class="section-title">PROJECTS</h2>
+              <div class="section-divider"></div>
+              <div id="r-projects" class="r-projects-entries">
+                <!-- Dynamic Projects lists -->
+              </div>
+            </section>
+
+            <!-- Technical Skills Section -->
+            <section class="resume-section" id="rs-skills">
+              <h2 class="section-title">TECHNICAL SKILLS</h2>
+              <div class="section-divider"></div>
+              <table id="r-skills" class="r-skills-table">
+                <!-- Dynamic skills table -->
+              </table>
+            </section>
+
+            <!-- Certifications Section -->
+            <section class="resume-section" id="rs-certifications">
+              <h2 class="section-title">CERTIFICATIONS</h2>
+              <div class="section-divider"></div>
+              <ul id="r-certifications" class="r-certifications-list">
+                <!-- Dynamic Cert list -->
+              </ul>
+            </section>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Resume Parser Modal Overlay -->
+  <div id="parser-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-file-import"></i> Import from Resume</h3>
+        <button type="button" id="btn-close-modal" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-tabs">
+        <button type="button" id="tab-file" class="tab-btn active">Upload File</button>
+        <button type="button" id="tab-text" class="tab-btn">Paste Text</button>
+      </div>
+      <div class="modal-body">
+        <!-- Tab Content: File Upload -->
+        <div id="content-file" class="tab-content active">
+          <div class="file-upload-zone" id="file-upload-zone">
+            <i class="fa-solid fa-cloud-arrow-up file-icon"></i>
+            <p class="upload-headline">Drag & drop or click to choose a file</p>
+            <p class="upload-subline">Accepts PDF, TXT, or JSON formats</p>
+            <input type="file" id="parser-file-input" accept=".pdf,.txt,.json">
+            <span class="file-info-label" id="parser-file-info">No file selected</span>
+          </div>
+          <div class="parser-action-container">
+            <button type="button" id="btn-parse-file" class="btn btn-primary" disabled>
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Parse File
+            </button>
+          </div>
+        </div>
+        
+        <!-- Tab Content: Paste Text -->
+        <div id="content-text" class="tab-content">
+          <div class="form-group">
+            <label for="parser-text-input">Paste Resume Text</label>
+            <textarea id="parser-text-input" rows="8" placeholder="Paste your raw resume text here. We will search for details like email, phone, location, summary, education history, and technical skill groups..."></textarea>
+          </div>
+          <div class="parser-action-container">
+            <button type="button" id="btn-parse-text" class="btn btn-primary">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Parse & Fill Form
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <p class="parser-disclaimer"><i class="fa-solid fa-circle-info"></i> Note: PDF parsing works best for selectable text resumes. Always double check your entries after parsing completes.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
