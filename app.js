@@ -1165,6 +1165,7 @@ btnParseFile.addEventListener('click', () => {
 });
 
 // Heuristic Text Parser
+// Heuristic Text Parser (Improved)
 function parseResumeText(text) {
   if (!text) return;
   
@@ -1191,8 +1192,8 @@ function parseResumeText(text) {
   const emailMatch = fullText.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/);
   if (emailMatch) parsed.personal.email = emailMatch[0];
 
-  // 2. Phone extraction
-  const phoneMatch = fullText.match(/(?:\+?\d{1,3}[- ]?)?\(?\d{3,4}\)?[- ]?\d{3,4}[- ]?\d{4}/);
+  // 2. Phone extraction (More robust to catch spacing)
+  const phoneMatch = fullText.match(/(?:\+?\d{1,3}[-\s]?)?\(?\d{3,4}\)?[-\s]?\d{3,4}[-\s]?\d{4}/);
   if (phoneMatch) parsed.personal.phone = phoneMatch[0];
 
   // 3. LinkedIn URL extraction
@@ -1224,15 +1225,22 @@ function parseResumeText(text) {
     parsed.personal.location = locMatch[0];
   }
 
-  // 7. Section Splitting
-  const headings = ['SUMMARY', 'EDUCATION', 'EXPERIENCE', 'PROJECTS', 'TECHNICAL SKILLS', 'SKILLS', 'CERTIFICATIONS'];
+  // 7. Enhanced Section Splitting (Using Aliases)
+  const headingAliases = [
+    { key: 'SUMMARY', regex: /\b(SUMMARY|PROFILE|OBJECTIVE|ABOUT ME|PROFESSIONAL SUMMARY)\b/i },
+    { key: 'EDUCATION', regex: /\b(EDUCATION|ACADEMICS|ACADEMIC BACKGROUND|SCHOLASTICS)\b/i },
+    { key: 'EXPERIENCE', regex: /\b(EXPERIENCE|WORK EXPERIENCE|EMPLOYMENT|WORK HISTORY|PROFESSIONAL EXPERIENCE)\b/i },
+    { key: 'PROJECTS', regex: /\b(PROJECTS|ACADEMIC PROJECTS|PERSONAL PROJECTS)\b/i },
+    { key: 'SKILLS', regex: /\b(TECHNICAL SKILLS|SKILLS|CORE COMPETENCIES|TECHNOLOGIES)\b/i },
+    { key: 'CERTIFICATIONS', regex: /\b(CERTIFICATIONS|COURSES|CERTIFICATES|AWARDS)\b/i }
+  ];
+  
   const headingIndices = [];
   
-  headings.forEach(heading => {
-    const regex = new RegExp(`\\b${heading}\\b`, 'i');
-    const match = fullText.match(regex);
+  headingAliases.forEach(alias => {
+    const match = fullText.match(alias.regex);
     if (match) {
-      headingIndices.push({ name: heading, index: match.index });
+      headingIndices.push({ key: alias.key, name: match[0], index: match.index });
     }
   });
   
@@ -1250,9 +1258,11 @@ function parseResumeText(text) {
     blockText = blockText.replace(/^[\s\-–—\=_#\*]+/g, '').trim();
     const blockLines = blockText.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
 
-    if (current.name === 'SUMMARY') {
+    if (current.key === 'SUMMARY') {
       parsed.summary = blockText.replace(/\n+/g, ' ');
-    } else if (current.name === 'TECHNICAL SKILLS' || current.name === 'SKILLS') {
+    } 
+    
+    else if (current.key === 'SKILLS') {
       blockLines.forEach(line => {
         const parts = line.split(':');
         if (parts.length >= 2) {
@@ -1260,80 +1270,75 @@ function parseResumeText(text) {
             category: parts[0].trim(),
             list: parts.slice(1).join(':').trim()
           });
+        } else if (line.length > 3) {
+          // Fallback: If no colon is found, add the line as a general skill category
+          parsed.skills.push({ category: 'Key Skills', list: line.trim() });
         }
       });
-    } else if (current.name === 'CERTIFICATIONS') {
+    } 
+    
+    else if (current.key === 'CERTIFICATIONS') {
       blockLines.forEach(line => {
-        const cleaned = line.replace(/^[•\-\*\s]+/, '').trim();
+        const cleaned = line.replace(/^[•\-\*·➢❖\s]+/, '').trim();
         if (cleaned.length > 3) {
           parsed.certifications.push({ name: cleaned });
         }
       });
-    } else if (current.name === 'EDUCATION') {
+    } 
+    
+    else if (current.key === 'EDUCATION') {
       // College Graduation search
-      const gradLineIdx = blockLines.findIndex(l => l.toLowerCase().match(/(college|university|b\.e|b\.tech|bachelor|degree|grad|engineering)/));
+      const gradLineIdx = blockLines.findIndex(l => l.toLowerCase().match(/(college|university|b\.e|b\.tech|bachelor|degree|grad|engineering|institute)/));
       if (gradLineIdx !== -1) {
         parsed.education.graduation.collegeName = blockLines[gradLineIdx];
         if (blockLines[gradLineIdx + 1]) {
           parsed.education.graduation.degree = blockLines[gradLineIdx + 1].replace(/\s*[-–]\s*(?:CGPA|Grade|Marks)?:?\s*[\d\.]+.*$/i, '').trim();
-          const cgpaMatch = blockLines[gradLineIdx + 1].match(/(?:CGPA|Grade|Marks)?:?\s*([\d\.]+)/i);
+          const cgpaMatch = blockText.match(/(?:CGPA|Grade|Marks)?:?\s*([\d\.]+)/i);
           if (cgpaMatch) parsed.education.graduation.cgpa = cgpaMatch[1];
-          const locMatch = blockLines[gradLineIdx + 1].match(/\b([A-Za-z\s]+),\s*([A-Za-z\s]{2,})\b/);
-          if (locMatch) parsed.education.graduation.location = locMatch[0];
         }
-        const durMatch = blockText.match(/\b(20\d{2})\s*[-–]\s*(20\d{2})\b/);
+        const durMatch = blockText.match(/\b(20\d{2})\s*[-–]\s*(20\d{2}|Present)\b/i);
         if (durMatch) parsed.education.graduation.duration = `${durMatch[1]} - ${durMatch[2]}`;
-        if (!parsed.education.graduation.location) parsed.education.graduation.location = "Bagalkot, Karnataka";
       }
       
       // Intermediate XII search
-      const interLineIdx = blockLines.findIndex(l => l.toLowerCase().match(/(intermediate|class xii|xii|12th|p\.c\. jabin|junior college)/));
+      const interLineIdx = blockLines.findIndex(l => l.toLowerCase().match(/(intermediate|class xii|xii|12th|puc|junior college)/));
       if (interLineIdx !== -1) {
         parsed.education.intermediate.collegeName = blockLines[interLineIdx];
         if (blockLines[interLineIdx + 1]) {
           parsed.education.intermediate.board = blockLines[interLineIdx + 1].replace(/\s*[-–]\s*\d+(?:\.\d+)?%.*$/i, '').trim();
           const percMatch = blockLines[interLineIdx + 1].match(/(\d+(?:\.\d+)?%)/);
           if (percMatch) parsed.education.intermediate.percentage = percMatch[1];
-          const locMatch = blockLines[interLineIdx + 1].match(/\b([A-Za-z\s]+),\s*([A-Za-z\s]{2,})\b/);
-          if (locMatch) parsed.education.intermediate.location = locMatch[0];
         }
         const yrMatch = blockLines[interLineIdx].match(/\b(20\d{2})\s*[-–]\s*(20\d{2})\b/) || blockText.match(/\b(20\d{2})\s*[-–]\s*(20\d{2})\b/);
-        if (yrMatch) {
-          parsed.education.intermediate.year = Array.isArray(yrMatch) ? yrMatch[1] || yrMatch[0] : yrMatch;
-        } else {
-          const singleYr = blockLines[interLineIdx].match(/\b(20\d{2})\b/);
-          if (singleYr) parsed.education.intermediate.year = singleYr[1];
-        }
-        if (!parsed.education.intermediate.location) parsed.education.intermediate.location = "Hubballi, Karnataka";
+        if (yrMatch) parsed.education.intermediate.year = yrMatch[0];
       }
 
       // School X search
-      const schoolLineIdx = blockLines.findIndex(l => l.toLowerCase().match(/(school|class x|x|10th|high school|matriculation)/));
+      const schoolLineIdx = blockLines.findIndex(l => l.toLowerCase().match(/(school|class x|x|10th|high school|matriculation|sslc)/));
       if (schoolLineIdx !== -1) {
         parsed.education.school.schoolName = blockLines[schoolLineIdx];
         if (blockLines[schoolLineIdx + 1]) {
           parsed.education.school.board = blockLines[schoolLineIdx + 1].replace(/\s*[-–]\s*\d+(?:\.\d+)?%.*$/i, '').trim();
           const percMatch = blockLines[schoolLineIdx + 1].match(/(\d+(?:\.\d+)?%)/);
           if (percMatch) parsed.education.school.percentage = percMatch[1];
-          const locMatch = blockLines[schoolLineIdx + 1].match(/\b([A-Za-z\s]+),\s*([A-Za-z\s]{2,})\b/);
-          if (locMatch) parsed.education.school.location = locMatch[0];
         }
         const yrMatch = blockLines[schoolLineIdx].match(/\b(20\d{2})\b/) || (blockLines[schoolLineIdx + 1] && blockLines[schoolLineIdx + 1].match(/\b(20\d{2})\b/));
         if (yrMatch) parsed.education.school.year = yrMatch[1];
-        if (!parsed.education.school.location) parsed.education.school.location = "Hubballi, Karnataka";
       }
-    } else if (current.name === 'EXPERIENCE') {
+    } 
+    
+    else if (current.key === 'EXPERIENCE') {
       let expItem = { company: '', role: '', duration: '', location: '', bullets: [] };
       blockLines.forEach(line => {
-        if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
-          expItem.bullets.push(line.replace(/^[•\-\*\s]+/, '').trim());
+        // Expanded bullet point detection characters
+        if (/^[•\-\*·➢❖\s]/.test(line) && line.length > 2) {
+          expItem.bullets.push(line.replace(/^[•\-\*·➢❖\s]+/, '').trim());
         } else {
           if (expItem.bullets.length > 0) {
             parsed.experience.push(expItem);
             expItem = { company: '', role: '', duration: '', location: '', bullets: [] };
           }
           if (!expItem.company) {
-            // Check for duration patterns inside company line
             const durMatch = line.match(/\b([A-Za-z]{3}\s*\d{4}|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/);
             if (durMatch) {
               expItem.duration = line;
@@ -1345,14 +1350,16 @@ function parseResumeText(text) {
           }
         }
       });
-      if (expItem.company) {
+      if (expItem.company || expItem.role) {
         parsed.experience.push(expItem);
       }
-    } else if (current.name === 'PROJECTS') {
+    } 
+    
+    else if (current.key === 'PROJECTS') {
       let projItem = { title: '', description: '', techUsed: '', bullets: [] };
       blockLines.forEach(line => {
-        if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
-          projItem.bullets.push(line.replace(/^[•\-\*\s]+/, '').trim());
+        if (/^[•\-\*·➢❖\s]/.test(line) && line.length > 2) {
+          projItem.bullets.push(line.replace(/^[•\-\*·➢❖\s]+/, '').trim());
         } else {
           if (projItem.bullets.length > 0 || projItem.description) {
             parsed.projects.push(projItem);
@@ -1365,7 +1372,7 @@ function parseResumeText(text) {
           }
         }
       });
-      if (projItem.title) {
+      if (projItem.title || projItem.description) {
         parsed.projects.push(projItem);
       }
     }
@@ -1383,7 +1390,6 @@ function parseResumeText(text) {
   
   alert("Resume PDF/text successfully parsed! Verify fields, then click 'Generate Resume' to see your new preview.");
 }
-
 
 // Load App on startup
 window.onload = init;
