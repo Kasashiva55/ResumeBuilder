@@ -73,7 +73,6 @@
         }
     </style>
 </head>
-<!-- fixed inset-0 completely solves the mobile flex/scroll height bug -->
 <body class="fixed inset-0 flex flex-col lg:flex-row">
 
     <!-- Mobile View Switcher Tabs -->
@@ -214,15 +213,13 @@
                         <div class="words-value font-semibold uppercase text-[12px]" id="out-words">Rupees Zero Only</div>
                     </div>
 
-                    <div class="flex-grow"></div>
-
-                    <!-- Professional Account & Terms Section -->
-                    <div class="mt-4 border border-black text-[12px] flex shrink-0">
+                    <!-- Professional Account & Terms Section (Placed directly below totals with clean spacing) -->
+                    <div class="mt-8 border border-black text-[12px] flex shrink-0">
                         <!-- Left: Account Details -->
-                        <div class="w-[45%] border-r border-black p-3 flex flex-col">
-                            <div class="font-bold border-b border-black pb-1 mb-2">Account Details:</div>
-                            <table class="w-full text-[11px] leading-tight border-collapse">
-                                <tr><td class="font-semibold py-1 w-24">A/C Name</td><td class="py-1">: Banne Srinaiah</td></tr>
+                        <div class="w-1/2 border-r border-black p-4 flex flex-col">
+                            <div class="font-bold text-[13px] border-b border-black pb-1 mb-2">ACCOUNT DETAILS:</div>
+                            <table class="w-full text-[12px] leading-relaxed border-collapse">
+                                <tr><td class="font-semibold py-1 w-28">A/C Name</td><td class="py-1">: Banne Srinaiah</td></tr>
                                 <tr><td class="font-semibold py-1">A/C Number</td><td class="py-1">: 037210100099223</td></tr>
                                 <tr><td class="font-semibold py-1">Bank Name</td><td class="py-1">: Union Bank of India</td></tr>
                                 <tr><td class="font-semibold py-1">IFSC Code</td><td class="py-1">: UBIN0803723</td></tr>
@@ -230,9 +227,9 @@
                             </table>
                         </div>
                         <!-- Right: Terms & Conditions -->
-                        <div class="w-[55%] p-3">
-                            <div class="font-bold text-red-600 border-b border-black pb-1 mb-2">TERMS & CONDITIONS</div>
-                            <ol class="list-decimal pl-4 space-y-1 text-[10px] leading-snug">
+                        <div class="w-1/2 p-4">
+                            <div class="font-bold text-red-600 text-[13px] border-b border-black pb-1 mb-2 uppercase">Terms & Conditions</div>
+                            <ol class="list-decimal pl-4 space-y-1.5 text-[11px] leading-tight">
                                 <li>Payment 100% Advance Along with Purchase Order.</li>
                                 <li>Delivery Time: within 15-60 working days after confirmation.</li>
                                 <li>Extra Materials/Fittings, if any will be charged extra as per field conditions.</li>
@@ -242,6 +239,9 @@
                             </ol>
                         </div>
                     </div>
+
+                    <!-- flex-grow pushes the "Thank you" specifically to the bottom of the A4 page -->
+                    <div class="flex-grow"></div>
 
                     <div class="text-center text-[14px] mt-6 shrink-0 font-semibold">
                         Thank you for your business.
