@@ -230,7 +230,7 @@
                         <div class="words-value font-semibold uppercase text-[12px]" id="out-words">Rupees Zero Only</div>
                     </div>
 
-                    <!-- Professional Account & Terms Section -->
+                    <!-- Professional Account & Terms Section with single Terms & Conditions item -->
                     <div class="mt-8 border border-black text-[12px] flex shrink-0">
                         <!-- Left: Account Details -->
                         <div class="w-1/2 border-r border-black p-4 flex flex-col">
@@ -243,16 +243,11 @@
                                 <tr><td class="font-semibold py-1">Branch</td><td class="py-1">: MALL</td></tr>
                             </table>
                         </div>
-                        <!-- Right: Terms & Conditions -->
-                        <div class="w-1/2 p-4">
+                        <!-- Right: Terms & Conditions (Only 1st term retained) -->
+                        <div class="w-1/2 p-4 flex flex-col">
                             <div class="font-bold text-red-600 text-[13px] border-b border-black pb-1 mb-2 uppercase">Terms & Conditions</div>
                             <ol class="list-decimal pl-4 space-y-1.5 text-[11px] leading-tight">
-                                <li>Payment 100% Advance Along with Purchase Order.</li>
-                                <li>Delivery Time: within 15-60 working days after confirmation.</li>
-                                <li>Extra Materials/Fittings, if any will be charged extra as per field conditions.</li>
-                                <li>Trenching, earthwork, refilling motor pump and labour should be provided by the customer.</li>
-                                <li>Rates Valid upto 4-7 days from the date of quotation shared.</li>
-                                <li>Any Goods once sold, will not be taken back.</li>
+                                <li>Payment 100% Advance Along with Purchase Order[cite: 1].</li>
                             </ol>
                         </div>
                     </div>
@@ -298,7 +293,6 @@
             return "Rupees " + out.replace(/\s+/g, ' ').trim() + " Only";
         }
 
-        // Toggle Installation Field Function
         function toggleInstallation() {
             const container = document.getElementById('installation-container');
             const checkbox = document.getElementById('toggle-installation');
@@ -306,11 +300,10 @@
             
             if (checkbox.checked) {
                 container.classList.remove('hidden');
-                // Auto focus the input field for ease of use
                 setTimeout(() => input.focus(), 50);
             } else {
                 container.classList.add('hidden');
-                input.value = ''; // clear value so it doesn't calculate while hidden
+                input.value = ''; 
             }
             updatePreview();
         }
@@ -455,8 +448,6 @@
             document.getElementById('out-date').textContent = document.getElementById('in-date').value;
             
             const transport = Number(document.getElementById('in-transport').value) || 0;
-            
-            // Handle optional Installation logic
             const includeInstallation = document.getElementById('toggle-installation').checked;
             const installation = includeInstallation ? (Number(document.getElementById('in-installation').value) || 0) : 0;
             
@@ -495,7 +486,6 @@
                 </tr>
             `;
 
-            // Conditionally add the Installation row to the PDF preview if toggled ON
             if (includeInstallation) {
                 tfootHTML += `
                 <tr>
