@@ -1,449 +1,270 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resume Builder</title>
-  <meta name="description" content="Build and export beautiful, professional resumes matching the classic LaTeX/serif format.">
-  
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-
-  <!-- PDF.js library for resume parsing -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-  
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-
-  <!-- App Header / Navigation -->
-  <header class="app-header">
-    <div class="header-logo">
-      <i class="fa-solid fa-file-invoice"></i>
-      <h1>Resume Builder</h1>
-    </div>
-    
-    <div class="header-actions">
-      <!-- Editor Mode Actions -->
-      <button id="btn-parse-resume" class="btn btn-secondary editor-only" title="Import and parse details from an existing resume PDF or text">
-        <i class="fa-solid fa-file-invoice"></i> Import from Resume
-      </button>
-      <button id="btn-clear" class="btn btn-secondary text-danger editor-only" title="Clear all input fields">
-        <i class="fa-solid fa-trash-can"></i> Clear Form
-      </button>
-      
-      <!-- Preview Mode Actions -->
-      <button id="btn-back" class="btn btn-secondary preview-only" title="Return to editor form">
-        <i class="fa-solid fa-arrow-left"></i> Back to Edit
-      </button>
-      <button id="btn-print" class="btn btn-primary preview-only" title="Export resume to PDF via html2pdf.js">
-        <i class="fa-solid fa-download"></i> Download PDF
-      </button>
-      
-      <div class="divider"></div>
-      
-      <!-- General Actions -->
-      <button id="btn-theme-toggle" class="btn-icon" title="Toggle Light/Dark Mode">
-        <i class="fa-solid fa-sun icon-light"></i>
-        <i class="fa-solid fa-moon icon-dark"></i>
-      </button>
-    </div>
-  </header>
-
-  <!-- Main Container Layout -->
-  <main class="app-main">
-    
-    <!-- Left Editor Panel (Form) -->
-    <form id="resume-form" class="editor-panel" onsubmit="event.preventDefault();">
-      
-      <!-- Accordion Section: Personal Info -->
-      <div class="accordion-item active">
-        <div class="accordion-header">
-          <i class="fa-solid fa-user-tie"></i>
-          <span>Basic Details</span>
-          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
-        </div>
-        <div class="accordion-content">
-          <div class="grid-2">
-            <div class="form-group">
-              <label for="p-name">Full Name <span class="required">*</span></label>
-              <input type="text" id="p-name" placeholder="Sarvesh N Hiremath" required>
-            </div>
-            <div class="form-group">
-              <label for="p-location">Location (City, State) <span class="required">*</span></label>
-              <input type="text" id="p-location" placeholder="Hubballi, Karnataka" required>
-            </div>
-          </div>
-          <div class="grid-2">
-            <div class="form-group">
-              <label for="p-phone">Phone Number <span class="required">*</span></label>
-              <input type="text" id="p-phone" placeholder="+91-6364563283" required>
-            </div>
-            <div class="form-group">
-              <label for="p-email">Email Address <span class="required">*</span></label>
-              <input type="email" id="p-email" placeholder="sarusondj@gmail.com" required>
-            </div>
-          </div>
-          <div class="grid-2">
-            <div class="form-group">
-              <label for="p-linkedin-text">LinkedIn Label</label>
-              <input type="text" id="p-linkedin-text" placeholder="LinkedIn">
-            </div>
-            <div class="form-group">
-              <label for="p-linkedin-url">LinkedIn URL <span class="required">*</span></label>
-              <input type="url" id="p-linkedin-url" placeholder="https://linkedin.com/in/username" required>
-            </div>
-          </div>
-          <div class="grid-2">
-            <div class="form-group">
-              <label for="p-github-text">GitHub Label</label>
-              <input type="text" id="p-github-text" placeholder="GitHub">
-            </div>
-            <div class="form-group">
-              <label for="p-github-url">GitHub URL <span class="required">*</span></label>
-              <input type="url" id="p-github-url" placeholder="https://github.com/username" required>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Accordion Section: Summary -->
-      <div class="accordion-item">
-        <div class="accordion-header">
-          <i class="fa-solid fa-address-card"></i>
-          <span>Professional Summary</span>
-          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
-        </div>
-        <div class="accordion-content">
-          <div class="form-group">
-            <label for="p-summary">Professional Summary <span class="required">*</span></label>
-            <textarea id="p-summary" rows="4" placeholder="Brief overview of your experience, skills, and goals..." required></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- Accordion Section: Education (Graduation, Intermediate, School) -->
-      <div class="accordion-item">
-        <div class="accordion-header">
-          <i class="fa-solid fa-graduation-cap"></i>
-          <span>Education</span>
-          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
-        </div>
-        <div class="accordion-content">
-          <!-- Graduation -->
-          <div class="education-sub-section">
-            <h4 class="sub-section-title">College / Graduation</h4>
-            <div class="grid-2">
-              <div class="form-group">
-                <label for="edu-coll-name">College Name <span class="required">*</span></label>
-                <input type="text" id="edu-coll-name" placeholder="Basaveshwar Engineering College" required>
-              </div>
-              <div class="form-group">
-                <label for="edu-coll-location">Location (City, State) <span class="required">*</span></label>
-                <input type="text" id="edu-coll-location" placeholder="Bagalkot, Karnataka" required>
-              </div>
-            </div>
-            <div class="grid-3">
-              <div class="form-group">
-                <label for="edu-coll-degree">Degree <span class="required">*</span></label>
-                <input type="text" id="edu-coll-degree" placeholder="B.E" required>
-              </div>
-              <div class="form-group">
-                <label for="edu-coll-cgpa">CGPA <span class="required">*</span></label>
-                <input type="text" id="edu-coll-cgpa" placeholder="6.20" required>
-              </div>
-              <div class="form-group">
-                <label for="edu-coll-duration">Duration (Start - End Year) <span class="required">*</span></label>
-                <input type="text" id="edu-coll-duration" placeholder="2022 - 2026" required>
-              </div>
-            </div>
-          </div>
-          
-          <hr class="form-divider">
-          
-          <!-- Intermediate -->
-          <div class="education-sub-section">
-            <h4 class="sub-section-title">Intermediate (Class XII)</h4>
-            <div class="grid-2">
-              <div class="form-group">
-                <label for="edu-int-college">College Name <span class="required">*</span></label>
-                <input type="text" id="edu-int-college" placeholder="P. C. Jabin College" required>
-              </div>
-              <div class="form-group">
-                <label for="edu-int-location">Location (City, State) <span class="required">*</span></label>
-                <input type="text" id="edu-int-location" placeholder="Hubballi, Karnataka" required>
-              </div>
-            </div>
-            <div class="grid-3">
-              <div class="form-group">
-                <label for="edu-int-board">Board & Stream <span class="required">*</span></label>
-                <input type="text" id="edu-int-board" placeholder="KSEEB (Class XII) - PCMCs" required>
-              </div>
-              <div class="form-group">
-                <label for="edu-int-percentage">Percentage <span class="required">*</span></label>
-                <input type="text" id="edu-int-percentage" placeholder="52.2%" required>
-              </div>
-              <div class="form-group">
-                <label for="edu-int-year">Duration / Year <span class="required">*</span></label>
-                <input type="text" id="edu-int-year" placeholder="2020 - 2022" required>
-              </div>
-            </div>
-          </div>
-          
-          <hr class="form-divider">
-          
-          <!-- School -->
-          <div class="education-sub-section">
-            <h4 class="sub-section-title">School (Class X)</h4>
-            <div class="grid-2">
-              <div class="form-group">
-                <label for="edu-sch-name">School Name <span class="required">*</span></label>
-                <input type="text" id="edu-sch-name" placeholder="Bethal English Medium School" required>
-              </div>
-              <div class="form-group">
-                <label for="edu-sch-location">Location (City, State) <span class="required">*</span></label>
-                <input type="text" id="edu-sch-location" placeholder="Hubballi, Karnataka" required>
-              </div>
-            </div>
-            <div class="grid-3">
-              <div class="form-group">
-                <label for="edu-sch-board">Board / Specification <span class="required">*</span></label>
-                <input type="text" id="edu-sch-board" placeholder="KSEEB (Class X)" required>
-              </div>
-              <div class="form-group">
-                <label for="edu-sch-percentage">Percentage <span class="required">*</span></label>
-                <input type="text" id="edu-sch-percentage" placeholder="77.92%" required>
-              </div>
-              <div class="form-group">
-                <label for="edu-sch-year">Duration / Year <span class="required">*</span></label>
-                <input type="text" id="edu-sch-year" placeholder="2019 - 2020" required>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Accordion Section: Experience -->
-      <div class="accordion-item">
-        <div class="accordion-header">
-          <i class="fa-solid fa-briefcase"></i>
-          <span>Experience</span>
-          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
-        </div>
-        <div class="accordion-content">
-          <div id="experience-list" class="dynamic-list">
-            <!-- Dynamic Items Added Here -->
-          </div>
-          <button type="button" class="btn btn-add" id="btn-add-experience">
-            <i class="fa-solid fa-plus"></i> Add Experience
-          </button>
-        </div>
-      </div>
-
-      <!-- Accordion Section: Projects -->
-      <div class="accordion-item">
-        <div class="accordion-header">
-          <i class="fa-solid fa-code"></i>
-          <span>Projects</span>
-          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
-        </div>
-        <div class="accordion-content">
-          <div id="projects-list" class="dynamic-list">
-            <!-- Dynamic Items Added Here -->
-          </div>
-          <button type="button" class="btn btn-add" id="btn-add-project">
-            <i class="fa-solid fa-plus"></i> Add Project
-          </button>
-        </div>
-      </div>
-
-      <!-- Accordion Section: Technical Skills -->
-      <div class="accordion-item">
-        <div class="accordion-header">
-          <i class="fa-solid fa-sliders"></i>
-          <span>Technical Skills</span>
-          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
-        </div>
-        <div class="accordion-content">
-          <p class="section-instruction">Enter custom skill headings dynamically (e.g. "Programming & DB", "Web Technologies").</p>
-          <div id="skills-list" class="dynamic-list">
-            <!-- Dynamic Items Added Here -->
-          </div>
-          <button type="button" class="btn btn-add" id="btn-add-skill">
-            <i class="fa-solid fa-plus"></i> Add Skill Category
-          </button>
-        </div>
-      </div>
-
-      <!-- Accordion Section: Certifications -->
-      <div class="accordion-item">
-        <div class="accordion-header">
-          <i class="fa-solid fa-certificate"></i>
-          <span>Certifications</span>
-          <i class="fa-solid fa-chevron-down accordion-arrow"></i>
-        </div>
-        <div class="accordion-content">
-          <p class="section-instruction">Add your certifications. Do not specify durations or times.</p>
-          <div id="certifications-list" class="dynamic-list">
-            <!-- Dynamic Items Added Here -->
-          </div>
-          <button type="button" class="btn btn-add" id="btn-add-certification">
-            <i class="fa-solid fa-plus"></i> Add Certification
-          </button>
-        </div>
-      </div>
-
-      <!-- Generate Resume Action at the bottom of the Form -->
-      <div class="form-submit-container">
-        <button id="btn-generate" class="btn btn-generate-resume">
-          <i class="fa-solid fa-arrows-spin"></i> Generate Resume
-        </button>
-      </div>
-
-    </form>
-
-    <!-- Right Live Preview Panel -->
-    <section class="preview-panel">
-      <!-- Floating Zoom Controls -->
-      <div class="zoom-controls">
-        <button id="btn-zoom-out" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
-        <span id="zoom-value">100%</span>
-        <input type="range" id="zoom-slider" min="50" max="150" value="100" step="5">
-        <button id="btn-zoom-in" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
-        <button id="btn-zoom-reset" class="btn-icon-small" title="Reset Zoom"><i class="fa-solid fa-rotate-left"></i></button>
-      </div>
-
-      <!-- Resume Page Container -->
-      <div class="resume-scroll-container">
-        <div class="resume-page-wrapper">
-          <div id="resume-page" class="resume-page">
-            
-            <!-- Header Section -->
-            <header class="resume-header">
-              <h1 id="r-name" class="r-title">YOUR NAME</h1>
-              <div id="r-location" class="r-location">City, State</div>
-              <div class="r-contact">
-                <span id="r-phone-container"><i class="fa-solid fa-phone icon-sep"></i><span id="r-phone">+91-000000000</span></span>
-                <span id="r-email-container"><i class="fa-solid fa-envelope icon-sep"></i><a href="#" id="r-email">email@domain.com</a></span>
-                <span id="r-linkedin-container"><i class="fa-brands fa-linkedin icon-sep"></i><a href="#" target="_blank" id="r-linkedin">LinkedIn</a></span>
-                <span id="r-github-container"><i class="fa-brands fa-github icon-sep"></i><a href="#" target="_blank" id="r-github">GitHub</a></span>
-              </div>
-            </header>
-
-            <!-- Summary Section -->
-            <section class="resume-section" id="rs-summary">
-              <h2 class="section-title">SUMMARY</h2>
-              <div class="section-divider"></div>
-              <p id="r-summary" class="r-summary-text">
-                Summary details...
-              </p>
-            </section>
-
-            <!-- Education Section -->
-            <section class="resume-section" id="rs-education">
-              <h2 class="section-title">EDUCATION</h2>
-              <div class="section-divider"></div>
-              <div id="r-education" class="r-education-entries">
-                <!-- College, Intermediate, School details will go here -->
-              </div>
-            </section>
-
-            <!-- Experience Section -->
-            <section class="resume-section" id="rs-experience">
-              <h2 class="section-title">EXPERIENCE</h2>
-              <div class="section-divider"></div>
-              <div id="r-experience" class="r-experience-entries">
-                <!-- Dynamic Experience lists -->
-              </div>
-            </section>
-
-            <!-- Projects Section -->
-            <section class="resume-section" id="rs-projects">
-              <h2 class="section-title">PROJECTS</h2>
-              <div class="section-divider"></div>
-              <div id="r-projects" class="r-projects-entries">
-                <!-- Dynamic Projects lists -->
-              </div>
-            </section>
-
-            <!-- Technical Skills Section -->
-            <section class="resume-section" id="rs-skills">
-              <h2 class="section-title">TECHNICAL SKILLS</h2>
-              <div class="section-divider"></div>
-              <table id="r-skills" class="r-skills-table">
-                <!-- Dynamic skills table -->
-              </table>
-            </section>
-
-            <!-- Certifications Section -->
-            <section class="resume-section" id="rs-certifications">
-              <h2 class="section-title">CERTIFICATIONS</h2>
-              <div class="section-divider"></div>
-              <ul id="r-certifications" class="r-certifications-list">
-                <!-- Dynamic Cert list -->
-              </ul>
-            </section>
-
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Resume Parser Modal Overlay -->
-  <div id="parser-modal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3><i class="fa-solid fa-file-import"></i> Import from Resume</h3>
-        <button type="button" id="btn-close-modal" class="modal-close-btn">&times;</button>
-      </div>
-      <div class="modal-tabs">
-        <button type="button" id="tab-file" class="tab-btn active">Upload File</button>
-        <button type="button" id="tab-text" class="tab-btn">Paste Text</button>
-      </div>
-      <div class="modal-body">
-        <!-- Tab Content: File Upload -->
-        <div id="content-file" class="tab-content active">
-          <div class="file-upload-zone" id="file-upload-zone">
-            <i class="fa-solid fa-cloud-arrow-up file-icon"></i>
-            <p class="upload-headline">Drag & drop or click to choose a file</p>
-            <p class="upload-subline">Accepts PDF, TXT, or JSON formats</p>
-            <input type="file" id="parser-file-input" accept=".pdf,.txt,.json">
-            <span class="file-info-label" id="parser-file-info">No file selected</span>
-          </div>
-          <div class="parser-action-container">
-            <button type="button" id="btn-parse-file" class="btn btn-primary" disabled>
-              <i class="fa-solid fa-wand-magic-sparkles"></i> Parse File
-            </button>
-          </div>
-        </div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Invoice Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Arial:wght@400;700&display=swap');
+        body { font-family: 'Arial', sans-serif; }
+        .invoice-container { width: 210mm; min-height: 297mm; padding: 20mm; margin: auto; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .invoice-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .invoice-table th, .invoice-table td { border: 1px solid black; padding: 8px; text-align: center; }
+        .invoice-table th { font-weight: bold; }
+        .invoice-table td.left-align { text-align: left; }
+        .footer-table { width: 100%; border-collapse: collapse; margin-top: 0; }
+        .footer-table td { border: 1px solid black; padding: 8px; }
+        .totals-label { text-align: right; font-weight: bold; width: 80%; }
+        .totals-value { text-align: center; font-weight: bold; width: 20%; }
         
-        <!-- Tab Content: Paste Text -->
-        <div id="content-text" class="tab-content">
-          <div class="form-group">
-            <label for="parser-text-input">Paste Resume Text</label>
-            <textarea id="parser-text-input" rows="8" placeholder="Paste your raw resume text here. We will search for details like email, phone, location, summary, education history, and technical skill groups..."></textarea>
-          </div>
-          <div class="parser-action-container">
-            <button type="button" id="btn-parse-text" class="btn btn-primary">
-              <i class="fa-solid fa-wand-magic-sparkles"></i> Parse & Fill Form
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <p class="parser-disclaimer"><i class="fa-solid fa-circle-info"></i> Note: PDF parsing works best for selectable text resumes. Always double check your entries after parsing completes.</p>
-      </div>
-    </div>
-  </div>
+        @media print {
+            .no-print { display: none !important; }
+            .invoice-container { box-shadow: none; margin: 0; padding: 10mm; width: 100%; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 flex flex-col lg:flex-row gap-6">
 
-  <script src="app.js"></script>
+    <!-- Form Section (Left) -->
+    <div class="w-full lg:w-1/3 bg-white p-6 rounded shadow no-print h-screen overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-4">Invoice Details</h2>
+        
+        <div class="mb-4">
+            <label class="block text-sm font-bold mb-1">Bill To (Name)</label>
+            <input type="text" id="billTo" class="w-full border p-2 rounded" value="Srinivas" oninput="updateInvoice()">
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm font-bold mb-1">Invoice No.</label>
+            <input type="text" id="invNo" class="w-full border p-2 rounded" value="27" oninput="updateInvoice()">
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm font-bold mb-1">Date</label>
+            <input type="text" id="invDate" class="w-full border p-2 rounded" value="05/07/2026" oninput="updateInvoice()">
+        </div>
+
+        <h3 class="text-xl font-bold mt-6 mb-2">Items</h3>
+        <div id="itemsContainer"></div>
+        <button onclick="addItem()" class="bg-blue-500 text-white px-4 py-2 rounded mt-2 hover:bg-blue-600">+ Add Item</button>
+
+        <div class="mt-6 mb-4">
+            <label class="block text-sm font-bold mb-1">Transport Charges</label>
+            <input type="number" id="transport" class="w-full border p-2 rounded" value="2000" oninput="updateInvoice()">
+        </div>
+
+        <button onclick="generatePDF()" class="bg-green-600 text-white w-full py-3 rounded mt-4 font-bold hover:bg-green-700 text-lg">Download PDF</button>
+    </div>
+
+    <!-- Preview Section (Right) -->
+    <div class="w-full lg:w-2/3 flex justify-center overflow-x-auto">
+        <div id="invoice-preview" class="invoice-container">
+            <!-- Header (Fixed) -->
+            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; margin-bottom: 5px;">
+                <div>Proprietor: B. Srinivas</div>
+                <div style="font-family: Arial, sans-serif;">Mobile: 6305322569</div>
+            </div>
+
+            <!-- Company Name (Fixed) -->
+            <div style="text-align: center; margin-bottom: 10px;">
+                <h1 style="color: red; margin: 0; font-size: 28px; font-weight: bold;">KISSAN IRRIGATIONS</h1>
+                <h2 style="color: red; margin: 5px 0; font-size: 18px; font-weight: bold;">(SWIMMING POOL AND FOUNTAINS)</h2>
+                <p style="margin: 0; font-size: 12px;">Injapur, Beside SS School, Hyderabad, Telangana-501510.</p>
+            </div>
+
+            <!-- Invoice Heading and Date -->
+            <div style="text-align: center; position: relative; margin-bottom: 15px; margin-top: 15px;">
+                <h3 style="margin: 0; font-size: 18px; text-decoration: underline; font-weight: bold;">INVOICE</h3>
+                <div style="position: absolute; right: 0; top: 20px; font-size: 14px;">
+                    Date: <span id="outDate">05/07/2026</span>
+                </div>
+            </div>
+
+            <!-- Bill To & Invoice No -->
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px;">
+                <div>
+                    <div style="font-weight: bold; text-decoration: underline;">BILL TO</div>
+                    <div id="outBillTo" style="margin-top: 5px;">Srinivas</div>
+                </div>
+                <div>
+                    <div style="font-weight: bold; text-decoration: underline;">INVOICE DETAILS</div>
+                    <div style="margin-top: 5px;">Invoice No.: <span id="outInvNo">27</span></div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <table class="invoice-table" id="outTable">
+                <thead>
+                    <tr>
+                        <th style="width: 8%;">S.No.</th>
+                        <th style="width: 35%;">Item Description</th>
+                        <th style="width: 12%;">Size</th>
+                        <th style="width: 10%;">Qty</th>
+                        <th style="width: 15%;">Rate</th>
+                        <th style="width: 20%;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="outTableBody">
+                </tbody>
+            </table>
+
+            <!-- Totals Footer -->
+            <table class="footer-table">
+                <tr>
+                    <td class="totals-label">Total</td>
+                    <td class="totals-value" id="outSubTotal">0</td>
+                </tr>
+                <tr>
+                    <td class="totals-label">Transport Charges</td>
+                    <td class="totals-value" id="outTransport">2000</td>
+                </tr>
+                <tr>
+                    <td class="totals-label" style="font-size: 16px;">GRAND TOTAL</td>
+                    <td class="totals-value" id="outGrandTotal" style="font-size: 16px;">0</td>
+                </tr>
+            </table>
+
+            <!-- Amount in words -->
+            <table class="footer-table" style="border-top: none;">
+                <tr>
+                    <td style="width: 20%; font-weight: bold; text-align: center;">Amount in<br>Words</td>
+                    <td style="width: 80%; font-weight: bold;" class="left-align" id="outWords">Rupees Zero Only</td>
+                </tr>
+            </table>
+
+            <!-- Footer Message -->
+            <div style="margin-top: 40px; font-weight: bold; font-size: 14px;">
+                Thank you for your business.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let items = [
+            { desc: 'Sprinklers', size: '6"', qty: 14, rate: 1750 },
+            { desc: 'Sprinkler joints', size: '3/4', qty: 14, rate: 275 },
+            { desc: 'Sprinklers adapter', size: '3/4', qty: 14, rate: 320 },
+            { desc: 'Ball Valves', size: '2"', qty: 5, rate: 720 },
+            { desc: 'Cleaning Valves', size: '2"', qty: 4, rate: 190 },
+            { desc: 'Filter', size: '3"', qty: 1, rate: 7500 },
+            { desc: 'L.d pipe', size: '16mm', qty: 2, rate: 7800 },
+            { desc: 'Emitter', size: '480Lps', qty: 800, rate: 4 }
+        ];
+
+        function renderFormItems() {
+            const container = document.getElementById('itemsContainer');
+            container.innerHTML = '';
+            items.forEach((item, index) => {
+                container.innerHTML += `
+                    <div class="border p-3 mb-2 rounded bg-gray-50 relative">
+                        <button onclick="removeItem(${index})" class="absolute top-2 right-2 text-red-500 font-bold hover:text-red-700">X</button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-xs">Description</label>
+                                <input type="text" class="w-full border p-1" value="${item.desc}" oninput="updateItem(${index}, 'desc', this.value)">
+                            </div>
+                            <div>
+                                <label class="text-xs">Size</label>
+                                <input type="text" class="w-full border p-1" value="${item.size}" oninput="updateItem(${index}, 'size', this.value)">
+                            </div>
+                            <div>
+                                <label class="text-xs">Qty</label>
+                                <input type="number" class="w-full border p-1" value="${item.qty}" oninput="updateItem(${index}, 'qty', this.value)">
+                            </div>
+                            <div>
+                                <label class="text-xs">Rate</label>
+                                <input type="number" class="w-full border p-1" value="${item.rate}" oninput="updateItem(${index}, 'rate', this.value)">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            updateInvoice();
+        }
+
+        function addItem() {
+            items.push({ desc: '', size: '', qty: 1, rate: 0 });
+            renderFormItems();
+        }
+
+        function removeItem(index) {
+            items.splice(index, 1);
+            renderFormItems();
+        }
+
+        function updateItem(index, field, value) {
+            items[index][field] = field === 'qty' || field === 'rate' ? Number(value) : value;
+            updateInvoice();
+        }
+
+        function formatNumber(num) {
+            return num.toLocaleString('en-IN');
+        }
+
+        function updateInvoice() {
+            document.getElementById('outBillTo').innerText = document.getElementById('billTo').value || '-';
+            document.getElementById('outInvNo').innerText = document.getElementById('invNo').value || '-';
+            document.getElementById('outDate').innerText = document.getElementById('invDate').value || '-';
+            
+            const tbody = document.getElementById('outTableBody');
+            tbody.innerHTML = '';
+            let subTotal = 0;
+
+            items.forEach((item, index) => {
+                const amount = item.qty * item.rate;
+                subTotal += amount;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${String(index + 1).padStart(2, '0')}</td>
+                        <td class="left-align">${item.desc}</td>
+                        <td>${item.size}</td>
+                        <td>${item.qty}</td>
+                        <td>${formatNumber(item.rate)}</td>
+                        <td>${formatNumber(amount)}</td>
+                    </tr>
+                `;
+            });
+
+            const transport = Number(document.getElementById('transport').value) || 0;
+            const grandTotal = subTotal + transport;
+
+            document.getElementById('outSubTotal').innerText = formatNumber(subTotal);
+            document.getElementById('outTransport').innerText = formatNumber(transport);
+            document.getElementById('outGrandTotal').innerText = formatNumber(grandTotal);
+            document.getElementById('outWords').innerText = "Rupees " + numberToWords(grandTotal) + " Only";
+        }
+
+        function numberToWords(num) {
+            if (num === 0) return "Zero";
+            const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+            const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+            if ((num = num.toString()).length > 9) return 'overflow';
+            let n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+            if (!n) return; let str = '';
+            str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+            str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+            str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+            str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+            str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+            return str.trim();
+        }
+
+        function generatePDF() {
+            const element = document.getElementById('invoice-preview');
+            const opt = {
+                margin:       0,
+                filename:     'Kissan_Irrigations_Invoice.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // Init
+        renderFormItems();
+    </script>
 </body>
 </html>
