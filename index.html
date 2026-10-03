@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Strict viewport tag forces mobile browsers to recognize mobile width immediately -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>Professional Invoice Generator</title>
     
@@ -96,7 +95,8 @@
     </nav>
 
     <!-- Editor Sidebar -->
-    <aside id="editor-panel" class="w-full lg:w-[450px] flex-1 lg:h-full bg-white border-r border-slate-300 flex flex-col shadow-xl z-20 flex-shrink-0">
+    <!-- FIX ADDED: min-h-0 and overflow-hidden prevent the container from expanding past screen height -->
+    <aside id="editor-panel" class="w-full lg:w-[450px] flex-1 min-h-0 overflow-hidden lg:h-full bg-white border-r border-slate-300 flex flex-col shadow-xl z-20 flex-shrink-0">
         <div class="p-4 bg-slate-900 text-white flex justify-between items-center shrink-0">
             <h1 class="text-sm lg:text-md font-bold tracking-wide">Invoice Editor</h1>
             <button onclick="generatePDF()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs lg:text-sm font-bold py-2 px-4 rounded transition-colors active:scale-95 shadow-md flex items-center gap-1.5">
@@ -105,6 +105,7 @@
             </button>
         </div>
 
+        <!-- The actual scrollable list area -->
         <div class="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-5 bg-slate-50">
             <section class="bg-white p-4 rounded shadow-sm border border-slate-200">
                 <h2 class="text-xs font-bold text-slate-500 uppercase mb-3 tracking-wider">Header Details</h2>
@@ -259,12 +260,10 @@
             const previewPanel = document.getElementById('preview-panel');
 
             if (isDesktop) {
-                // On Desktop, force both panels to show
                 editorPanel.classList.remove('hidden');
                 previewPanel.classList.remove('hidden');
                 previewPanel.classList.add('flex');
             } else {
-                // On Mobile, default to "Edit" tab if both are accidentally active
                 if (!editorPanel.classList.contains('hidden') && !previewPanel.classList.contains('hidden')) {
                     switchMobileTab('edit');
                 }
@@ -323,7 +322,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             renderFormItems();
             updatePreview();
-            setupInitialLayout(); // Guarantee mobile view sets up correctly on first load
+            setupInitialLayout(); 
         });
 
         window.addEventListener('resize', () => {
