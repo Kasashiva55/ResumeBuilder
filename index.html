@@ -35,7 +35,7 @@
             font-family: Arial, Helvetica, sans-serif; 
             color: #000;
             box-sizing: border-box; 
-            padding: 50px 60px; 
+            padding: 40px 50px; 
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
@@ -45,16 +45,16 @@
         .text-red-header { color: #ff0000; }
         .border-black-all { border: 1px solid #000; }
 
-        .invoice-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        .invoice-table th, .invoice-table td { border: 1px solid #000; padding: 6px 10px; }
+        .invoice-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        .invoice-table th, .invoice-table td { border: 1px solid #000; padding: 5px 8px; }
         .invoice-table th { font-weight: bold; text-align: left; background-color: transparent; }
         .invoice-table th.text-center, .invoice-table td.text-center { text-align: center; }
         .invoice-table th.text-right, .invoice-table td.text-right { text-align: right; }
         .totals-label { text-align: right; padding-right: 15px !important; border-left: 1px solid #000; border-right: 1px solid #000; }
 
-        .words-section { display: flex; border: 1px solid #000; border-top: none; font-size: 14px; }
-        .words-label { font-weight: bold; padding: 6px 10px; border-right: 1px solid #000; white-space: nowrap; }
-        .words-value { padding: 6px 10px; flex-grow: 1; }
+        .words-section { display: flex; border: 1px solid #000; border-top: none; font-size: 13px; }
+        .words-label { font-weight: bold; padding: 5px 8px; border-right: 1px solid #000; white-space: nowrap; }
+        .words-value { padding: 5px 8px; flex-grow: 1; }
 
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -64,7 +64,7 @@
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
         @media print {
-            body { overflow: visible !important; background-color: #fff; height: auto !important; }
+            body { overflow: visible !important; background-color: #fff; height: auto !important; position: static !important; }
             .invoice-preview { box-shadow: none; margin: 0; padding: 10mm; width: 100%; height: auto !important; max-height: none; transform: none !important; }
             aside, nav, .hide-on-print { display: none !important; }
             main { padding: 0 !important; background-color: transparent !important; overflow: visible !important; display: flex !important;}
@@ -73,10 +73,11 @@
         }
     </style>
 </head>
-<body class="flex flex-col lg:flex-row h-[100dvh]">
+<!-- fixed inset-0 completely solves the mobile flex/scroll height bug -->
+<body class="fixed inset-0 flex flex-col lg:flex-row">
 
     <!-- Mobile View Switcher Tabs -->
-    <nav class="mobile-nav-tabs bg-slate-900 border-b border-slate-800 text-white shrink-0 z-30 w-full">
+    <nav class="mobile-nav-tabs bg-slate-900 border-b border-slate-800 text-white flex-none z-30 w-full">
         <button id="tab-edit" onclick="switchMobileTab('edit')" class="flex-1 py-3 text-xs font-bold text-center border-b-2 border-blue-500 text-blue-400 flex items-center justify-center gap-1.5">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
             Edit Details
@@ -89,11 +90,11 @@
 
     <!-- Editor Sidebar -->
     <aside id="editor-panel" class="w-full lg:w-[450px] flex-1 flex flex-col min-h-0 bg-white border-r border-slate-300 shadow-xl z-20">
-        <div class="p-4 bg-slate-900 text-white flex items-center shrink-0 h-[60px]">
+        <div class="p-4 bg-slate-900 text-white flex items-center flex-none h-[60px]">
             <h1 class="text-sm lg:text-md font-bold tracking-wide">Invoice Editor</h1>
         </div>
 
-        <div class="flex-1 min-h-0 overflow-y-auto p-4 custom-scrollbar space-y-5 bg-slate-50">
+        <div class="flex-1 overflow-y-auto p-4 pb-24 custom-scrollbar space-y-5 bg-slate-50">
             <section class="bg-white p-4 rounded shadow-sm border border-slate-200">
                 <h2 class="text-xs font-bold text-slate-500 uppercase mb-3 tracking-wider">Header Details</h2>
                 <div class="grid grid-cols-2 gap-3">
@@ -149,10 +150,10 @@
     </aside>
 
     <!-- Document Preview Panel -->
-    <main id="preview-panel" class="hidden lg:flex flex-col flex-1 h-full min-h-0 bg-slate-300 z-10">
+    <main id="preview-panel" class="hidden lg:flex flex-col flex-1 min-h-0 bg-slate-300 z-10">
         
         <!-- Action Header for Preview (Contains Download Button) -->
-        <div class="hide-on-print p-3 lg:p-4 bg-slate-800 lg:bg-transparent flex justify-between lg:justify-end items-center shrink-0 shadow-md lg:shadow-none z-20 min-h-[60px]">
+        <div class="hide-on-print p-3 lg:p-4 bg-slate-800 lg:bg-transparent flex justify-between lg:justify-end items-center flex-none shadow-md lg:shadow-none z-20 min-h-[60px]">
             <h1 class="text-sm font-bold text-white lg:hidden">Preview</h1>
             <button onclick="generatePDF()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs lg:text-sm font-bold py-2 px-5 rounded shadow-md flex items-center gap-1.5 transition-colors active:scale-95">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -161,7 +162,7 @@
         </div>
 
         <!-- Scrollable Document Container -->
-        <div id="preview-scroll-container" class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3 lg:px-8 lg:pb-8 flex flex-col items-center custom-scrollbar relative">
+        <div id="preview-scroll-container" class="flex-1 overflow-y-auto overflow-x-hidden p-3 lg:px-8 lg:pb-8 flex flex-col items-center custom-scrollbar relative">
             <div id="invoice-scaler" class="relative transition-all duration-150 ease-out flex justify-center">
                 <div id="invoice-document" class="invoice-preview">
                     
@@ -210,12 +211,39 @@
 
                     <div class="words-section shrink-0">
                         <div class="words-label">Amount in Words</div>
-                        <div class="words-value font-semibold uppercase text-[13px]" id="out-words">Rupees Zero Only</div>
+                        <div class="words-value font-semibold uppercase text-[12px]" id="out-words">Rupees Zero Only</div>
                     </div>
 
                     <div class="flex-grow"></div>
 
-                    <div class="text-center text-[14px] mt-8 mb-4 shrink-0">
+                    <!-- Professional Account & Terms Section -->
+                    <div class="mt-4 border border-black text-[12px] flex shrink-0">
+                        <!-- Left: Account Details -->
+                        <div class="w-[45%] border-r border-black p-3 flex flex-col">
+                            <div class="font-bold border-b border-black pb-1 mb-2">Account Details:</div>
+                            <table class="w-full text-[11px] leading-tight border-collapse">
+                                <tr><td class="font-semibold py-1 w-24">A/C Name</td><td class="py-1">: Banne Srinaiah</td></tr>
+                                <tr><td class="font-semibold py-1">A/C Number</td><td class="py-1">: 037210100099223</td></tr>
+                                <tr><td class="font-semibold py-1">Bank Name</td><td class="py-1">: Union Bank of India</td></tr>
+                                <tr><td class="font-semibold py-1">IFSC Code</td><td class="py-1">: UBIN0803723</td></tr>
+                                <tr><td class="font-semibold py-1">Branch</td><td class="py-1">: MALL</td></tr>
+                            </table>
+                        </div>
+                        <!-- Right: Terms & Conditions -->
+                        <div class="w-[55%] p-3">
+                            <div class="font-bold text-red-600 border-b border-black pb-1 mb-2">TERMS & CONDITIONS</div>
+                            <ol class="list-decimal pl-4 space-y-1 text-[10px] leading-snug">
+                                <li>Payment 100% Advance Along with Purchase Order.</li>
+                                <li>Delivery Time: within 15-60 working days after confirmation.</li>
+                                <li>Extra Materials/Fittings, if any will be charged extra as per field conditions.</li>
+                                <li>Trenching, earthwork, refilling motor pump and labour should be provided by the customer.</li>
+                                <li>Rates Valid upto 4-7 days from the date of quotation shared.</li>
+                                <li>Any Goods once sold, will not be taken back.</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="text-center text-[14px] mt-6 shrink-0 font-semibold">
                         Thank you for your business.
                     </div>
                 </div>
