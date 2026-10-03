@@ -140,9 +140,26 @@
 
             <section class="bg-white p-4 rounded shadow-sm border border-slate-200">
                 <h2 class="text-xs font-bold text-slate-500 uppercase mb-3 tracking-wider">Additional Costs</h2>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Transport Charges (₹)</label>
-                    <input type="number" id="in-transport" value="" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Transport Charges (₹)</label>
+                        <input type="number" id="in-transport" value="" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
+                    </div>
+                    
+                    <!-- Installation Toggle & Field -->
+                    <div class="border-t border-slate-100 pt-3">
+                        <label class="flex items-start gap-2 cursor-pointer mb-2 group">
+                            <input type="checkbox" id="toggle-installation" onchange="toggleInstallation()" class="w-4 h-4 mt-0.5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 transition-colors cursor-pointer">
+                            <span class="text-[11px] text-slate-500 group-hover:text-slate-700 font-medium leading-tight">
+                                Note: If you want to include Installation Charges in this invoice, click this box.
+                            </span>
+                        </label>
+                        
+                        <div id="installation-container" class="hidden mt-3 transition-all">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Installation Charges (₹)</label>
+                            <input type="number" id="in-installation" value="" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors" placeholder="Enter amount...">
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
@@ -213,7 +230,7 @@
                         <div class="words-value font-semibold uppercase text-[12px]" id="out-words">Rupees Zero Only</div>
                     </div>
 
-                    <!-- Professional Account & Terms Section (Placed directly below totals with clean spacing) -->
+                    <!-- Professional Account & Terms Section -->
                     <div class="mt-8 border border-black text-[12px] flex shrink-0">
                         <!-- Left: Account Details -->
                         <div class="w-1/2 border-r border-black p-4 flex flex-col">
@@ -240,7 +257,6 @@
                         </div>
                     </div>
 
-                    <!-- flex-grow pushes the "Thank you" specifically to the bottom of the A4 page -->
                     <div class="flex-grow"></div>
 
                     <div class="text-center text-[14px] mt-6 shrink-0 font-semibold">
@@ -280,6 +296,23 @@
                 out += (a[lastTwo] || b[n[5][0]] + ' ' + (n[5][1] != 0 ? a[n[5][1]] : '')) + ' ';
             }
             return "Rupees " + out.replace(/\s+/g, ' ').trim() + " Only";
+        }
+
+        // Toggle Installation Field Function
+        function toggleInstallation() {
+            const container = document.getElementById('installation-container');
+            const checkbox = document.getElementById('toggle-installation');
+            const input = document.getElementById('in-installation');
+            
+            if (checkbox.checked) {
+                container.classList.remove('hidden');
+                // Auto focus the input field for ease of use
+                setTimeout(() => input.focus(), 50);
+            } else {
+                container.classList.add('hidden');
+                input.value = ''; // clear value so it doesn't calculate while hidden
+            }
+            updatePreview();
         }
 
         function setupInitialLayout() {
@@ -422,6 +455,11 @@
             document.getElementById('out-date').textContent = document.getElementById('in-date').value;
             
             const transport = Number(document.getElementById('in-transport').value) || 0;
+            
+            // Handle optional Installation logic
+            const includeInstallation = document.getElementById('toggle-installation').checked;
+            const installation = includeInstallation ? (Number(document.getElementById('in-installation').value) || 0) : 0;
+            
             const tbody = document.getElementById('out-table-body');
             tbody.innerHTML = '';
             
@@ -444,9 +482,9 @@
             });
 
             const tfoot = document.getElementById('out-table-foot');
-            const grandTotal = itemsTotal + transport;
+            const grandTotal = itemsTotal + transport + installation;
             
-            tfoot.innerHTML = `
+            let tfootHTML = `
                 <tr>
                     <td colspan="5" class="totals-label">Total</td>
                     <td class="text-right font-semibold">${formatCurrency(itemsTotal)}</td>
@@ -455,11 +493,26 @@
                     <td colspan="5" class="totals-label">Transport Charges</td>
                     <td class="text-right font-semibold">${formatCurrency(transport)}</td>
                 </tr>
+            `;
+
+            // Conditionally add the Installation row to the PDF preview if toggled ON
+            if (includeInstallation) {
+                tfootHTML += `
+                <tr>
+                    <td colspan="5" class="totals-label">Installation Charges</td>
+                    <td class="text-right font-semibold">${formatCurrency(installation)}</td>
+                </tr>
+                `;
+            }
+
+            tfootHTML += `
                 <tr>
                     <td colspan="5" class="totals-label font-bold uppercase">GRAND TOTAL</td>
                     <td class="text-right font-bold">${formatCurrency(grandTotal)}</td>
                 </tr>
             `;
+            
+            tfoot.innerHTML = tfootHTML;
 
             document.getElementById('out-words').textContent = numberToIndianWords(grandTotal);
             autoScaleInvoice();
