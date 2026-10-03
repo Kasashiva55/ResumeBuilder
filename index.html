@@ -16,7 +16,6 @@
             overflow: hidden; 
         }
 
-        /* Enforce Mobile/Desktop visibility instantly to prevent load glitches */
         @media (min-width: 1024px) {
             .mobile-nav-tabs { display: none !important; }
         }
@@ -24,7 +23,7 @@
             .mobile-nav-tabs { display: flex !important; }
         }
 
-        /* Fixed A4 Pixel Dimensions - STRICT height to prevent extra blank pages */
+        /* Fixed A4 Pixel Dimensions */
         .invoice-preview {
             width: 794px;
             height: 1122px; 
@@ -46,18 +45,11 @@
         .text-red-header { color: #ff0000; }
         .border-black-all { border: 1px solid #000; }
 
-        .invoice-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 14px;
-        }
-        
+        .invoice-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
         .invoice-table th, .invoice-table td { border: 1px solid #000; padding: 6px 10px; }
         .invoice-table th { font-weight: bold; text-align: left; background-color: transparent; }
         .invoice-table th.text-center, .invoice-table td.text-center { text-align: center; }
         .invoice-table th.text-right, .invoice-table td.text-right { text-align: right; }
-
         .totals-label { text-align: right; padding-right: 15px !important; border-left: 1px solid #000; border-right: 1px solid #000; }
 
         .words-section { display: flex; border: 1px solid #000; border-top: none; font-size: 14px; }
@@ -74,8 +66,9 @@
         @media print {
             body { overflow: visible !important; background-color: #fff; height: auto !important; }
             .invoice-preview { box-shadow: none; margin: 0; padding: 10mm; width: 100%; height: auto !important; max-height: none; transform: none !important; }
-            aside, nav { display: none !important; }
+            aside, nav, .hide-on-print { display: none !important; }
             main { padding: 0 !important; background-color: transparent !important; overflow: visible !important; display: flex !important;}
+            #preview-scroll-container { overflow: visible !important; padding: 0 !important; }
             #invoice-scaler { width: 100% !important; height: auto !important; }
         }
     </style>
@@ -95,18 +88,12 @@
     </nav>
 
     <!-- Editor Sidebar -->
-    <!-- FIX ADDED: min-h-0 and overflow-hidden prevent the container from expanding past screen height -->
-    <aside id="editor-panel" class="w-full lg:w-[450px] flex-1 min-h-0 overflow-hidden lg:h-full bg-white border-r border-slate-300 flex flex-col shadow-xl z-20 flex-shrink-0">
-        <div class="p-4 bg-slate-900 text-white flex justify-between items-center shrink-0">
+    <aside id="editor-panel" class="w-full lg:w-[450px] flex-1 flex flex-col min-h-0 bg-white border-r border-slate-300 shadow-xl z-20">
+        <div class="p-4 bg-slate-900 text-white flex items-center shrink-0 h-[60px]">
             <h1 class="text-sm lg:text-md font-bold tracking-wide">Invoice Editor</h1>
-            <button onclick="generatePDF()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs lg:text-sm font-bold py-2 px-4 rounded transition-colors active:scale-95 shadow-md flex items-center gap-1.5">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                Download PDF
-            </button>
         </div>
 
-        <!-- The actual scrollable list area -->
-        <div class="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-5 bg-slate-50">
+        <div class="flex-1 min-h-0 overflow-y-auto p-4 custom-scrollbar space-y-5 bg-slate-50">
             <section class="bg-white p-4 rounded shadow-sm border border-slate-200">
                 <h2 class="text-xs font-bold text-slate-500 uppercase mb-3 tracking-wider">Header Details</h2>
                 <div class="grid grid-cols-2 gap-3">
@@ -162,61 +149,75 @@
     </aside>
 
     <!-- Document Preview Panel -->
-    <main id="preview-panel" class="hidden lg:flex flex-1 h-full bg-slate-300 overflow-y-auto overflow-x-hidden p-3 lg:p-8 flex-col items-center custom-scrollbar relative z-10">
-        <div id="invoice-scaler" class="relative transition-all duration-150 ease-out flex justify-center">
-            <div id="invoice-document" class="invoice-preview">
-                <div class="flex justify-between text-[14px] mb-2 shrink-0">
-                    <div>Proprietor: <span id="out-proprietor" class="font-semibold">B. Srinivas</span></div>
-                    <div>Mobile: <span id="out-mobile" class="font-semibold">6305322569</span></div>
-                </div>
+    <main id="preview-panel" class="hidden lg:flex flex-col flex-1 h-full min-h-0 bg-slate-300 z-10">
+        
+        <!-- Action Header for Preview (Contains Download Button) -->
+        <div class="hide-on-print p-3 lg:p-4 bg-slate-800 lg:bg-transparent flex justify-between lg:justify-end items-center shrink-0 shadow-md lg:shadow-none z-20 min-h-[60px]">
+            <h1 class="text-sm font-bold text-white lg:hidden">Preview</h1>
+            <button onclick="generatePDF()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs lg:text-sm font-bold py-2 px-5 rounded shadow-md flex items-center gap-1.5 transition-colors active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Download PDF
+            </button>
+        </div>
 
-                <div class="text-center mb-4 shrink-0">
-                    <div class="text-[28px] font-bold text-red-header tracking-wide mb-1 leading-none">KISSAN IRRIGATIONS</div>
-                    <div class="text-[18px] font-bold text-red-header leading-tight mb-1">(SWIMMING POOL AND FOUNTAINS)</div>
-                    <div class="text-[12px]">Injapur, Beside SS School, Hyderabad, Telangana-501510.</div>
+        <!-- Scrollable Document Container -->
+        <div id="preview-scroll-container" class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3 lg:px-8 lg:pb-8 flex flex-col items-center custom-scrollbar relative">
+            <div id="invoice-scaler" class="relative transition-all duration-150 ease-out flex justify-center">
+                <div id="invoice-document" class="invoice-preview">
                     
-                    <div class="mt-4 flex justify-between items-end">
-                        <div class="w-1/3"></div> 
-                        <div class="text-[18px] font-bold underline w-1/3 text-center">INVOICE</div>
-                        <div class="w-1/3 text-right text-[14px] font-normal">Date: <span id="out-date" class="font-semibold"></span></div>
+                    <div class="flex justify-between text-[14px] mb-2 shrink-0">
+                        <div>Proprietor: <span id="out-proprietor" class="font-semibold">B. Srinivas</span></div>
+                        <div>Mobile: <span id="out-mobile" class="font-semibold">6305322569</span></div>
                     </div>
-                </div>
 
-                <div class="flex border-black-all text-[14px] mb-4 shrink-0">
-                    <div class="w-1/2 p-2 border-r border-black flex flex-col">
-                        <div class="font-bold border-b border-black pb-1 mb-2">BILL TO</div>
-                        <div id="out-billTo" class="mt-1 min-h-[20px] font-semibold uppercase"></div>
+                    <div class="text-center mb-4 shrink-0">
+                        <div class="text-[28px] font-bold text-red-header tracking-wide mb-1 leading-none">KISSAN IRRIGATIONS</div>
+                        <div class="text-[18px] font-bold text-red-header leading-tight mb-1">(SWIMMING POOL AND FOUNTAINS)</div>
+                        <div class="text-[12px]">Injapur, Beside SS School, Hyderabad, Telangana-501510.</div>
+                        
+                        <div class="mt-4 flex justify-between items-end">
+                            <div class="w-1/3"></div> 
+                            <div class="text-[18px] font-bold underline w-1/3 text-center">INVOICE</div>
+                            <div class="w-1/3 text-right text-[14px] font-normal">Date: <span id="out-date" class="font-semibold"></span></div>
+                        </div>
                     </div>
-                    <div class="w-1/2 p-2 flex flex-col">
-                        <div class="font-bold border-b border-black pb-1 mb-2">INVOICE DETAILS</div>
-                        <div class="mt-1">Invoice No.: <span id="out-invNo" class="font-semibold"></span></div>
+
+                    <div class="flex border-black-all text-[14px] mb-4 shrink-0">
+                        <div class="w-1/2 p-2 border-r border-black flex flex-col">
+                            <div class="font-bold border-b border-black pb-1 mb-2">BILL TO</div>
+                            <div id="out-billTo" class="mt-1 min-h-[20px] font-semibold uppercase"></div>
+                        </div>
+                        <div class="w-1/2 p-2 flex flex-col">
+                            <div class="font-bold border-b border-black pb-1 mb-2">INVOICE DETAILS</div>
+                            <div class="mt-1">Invoice No.: <span id="out-invNo" class="font-semibold"></span></div>
+                        </div>
                     </div>
-                </div>
 
-                <table class="invoice-table shrink-0">
-                    <thead>
-                        <tr>
-                            <th class="text-center w-[8%]">S.No.</th>
-                            <th class="w-[37%]">Item Description</th>
-                            <th class="text-center w-[15%]">Size</th>
-                            <th class="text-center w-[10%]">Qty</th>
-                            <th class="text-right w-[12%]">Rate</th>
-                            <th class="text-right w-[18%]">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody id="out-table-body"></tbody>
-                    <tfoot id="out-table-foot"></tfoot>
-                </table>
+                    <table class="invoice-table shrink-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center w-[8%]">S.No.</th>
+                                <th class="w-[37%]">Item Description</th>
+                                <th class="text-center w-[15%]">Size</th>
+                                <th class="text-center w-[10%]">Qty</th>
+                                <th class="text-right w-[12%]">Rate</th>
+                                <th class="text-right w-[18%]">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="out-table-body"></tbody>
+                        <tfoot id="out-table-foot"></tfoot>
+                    </table>
 
-                <div class="words-section shrink-0">
-                    <div class="words-label">Amount in Words</div>
-                    <div class="words-value font-semibold uppercase text-[13px]" id="out-words">Rupees Zero Only</div>
-                </div>
+                    <div class="words-section shrink-0">
+                        <div class="words-label">Amount in Words</div>
+                        <div class="words-value font-semibold uppercase text-[13px]" id="out-words">Rupees Zero Only</div>
+                    </div>
 
-                <div class="flex-grow"></div>
+                    <div class="flex-grow"></div>
 
-                <div class="text-center text-[14px] mt-8 mb-4 shrink-0">
-                    Thank you for your business.
+                    <div class="text-center text-[14px] mt-8 mb-4 shrink-0">
+                        Thank you for your business.
+                    </div>
                 </div>
             </div>
         </div>
@@ -253,7 +254,6 @@
             return "Rupees " + out.replace(/\s+/g, ' ').trim() + " Only";
         }
 
-        // Layout Engine - Ensures correct tabs load immediately
         function setupInitialLayout() {
             const isDesktop = window.innerWidth >= 1024;
             const editorPanel = document.getElementById('editor-panel');
@@ -272,10 +272,11 @@
         }
 
         function autoScaleInvoice() {
-            const container = document.getElementById('preview-panel');
+            const container = document.getElementById('preview-scroll-container');
             const invoice = document.getElementById('invoice-document');
             const scaler = document.getElementById('invoice-scaler');
-            if (!container || !invoice || !scaler || container.classList.contains('hidden')) return;
+            const previewPanel = document.getElementById('preview-panel');
+            if (!container || !invoice || !scaler || previewPanel.classList.contains('hidden')) return;
 
             const isDesktop = window.innerWidth >= 1024;
             const horizontalPadding = isDesktop ? 64 : 20;
@@ -334,8 +335,8 @@
             renderFormItems();
             updatePreview();
             setTimeout(() => {
-                const container = document.getElementById('items-container');
-                container.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                const container = document.querySelector('.custom-scrollbar');
+                container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
             }, 50);
         }
 
