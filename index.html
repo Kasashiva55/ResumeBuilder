@@ -4,267 +4,438 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Invoice Generator</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Arial:wght@400;700&display=swap');
-        body { font-family: 'Arial', sans-serif; }
-        .invoice-container { width: 210mm; min-height: 297mm; padding: 20mm; margin: auto; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .invoice-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .invoice-table th, .invoice-table td { border: 1px solid black; padding: 8px; text-align: center; }
-        .invoice-table th { font-weight: bold; }
-        .invoice-table td.left-align { text-align: left; }
-        .footer-table { width: 100%; border-collapse: collapse; margin-top: 0; }
-        .footer-table td { border: 1px solid black; padding: 8px; }
-        .totals-label { text-align: right; font-weight: bold; width: 80%; }
-        .totals-value { text-align: center; font-weight: bold; width: 20%; }
+        body {
+            background-color: #f1f5f9;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden; 
+        }
+
+        /* Strict A4 print dimensions */
+        .invoice-preview {
+            width: 210mm;
+            min-height: 297mm;
+            background: #ffffff;
+            margin: 20px auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            position: relative;
+            font-family: Arial, Helvetica, sans-serif; 
+            color: #000;
+            box-sizing: border-box; 
+            padding: 15mm 20mm; /* Standard margins */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Invoice specific styling */
+        .text-red-header {
+            color: #ff0000;
+        }
+
+        .border-black-all {
+            border: 1px solid #000;
+        }
+
+        /* Strict table borders */
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
         
+        .invoice-table th, 
+        .invoice-table td {
+            border: 1px solid #000;
+            padding: 6px 10px;
+        }
+        
+        .invoice-table th {
+            font-weight: bold;
+            text-align: left;
+            background-color: transparent;
+        }
+        
+        .invoice-table th.text-center, 
+        .invoice-table td.text-center {
+            text-align: center;
+        }
+
+        .invoice-table th.text-right, 
+        .invoice-table td.text-right {
+            text-align: right;
+        }
+
+        .totals-label {
+            text-align: right;
+            padding-right: 15px !important;
+            border-left: 1px solid #000;
+            border-right: 1px solid #000;
+        }
+
+        .words-section {
+            display: flex;
+            border: 1px solid #000;
+            border-top: none; /* Connects smoothly to table if placed right below */
+            font-size: 14px;
+        }
+        
+        .words-label {
+            font-weight: bold;
+            padding: 6px 10px;
+            border-right: 1px solid #000;
+            white-space: nowrap;
+        }
+        
+        .words-value {
+            padding: 6px 10px;
+            flex-grow: 1;
+        }
+
+        /* Custom scrollbars */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Print rules */
         @media print {
-            .no-print { display: none !important; }
-            .invoice-container { box-shadow: none; margin: 0; padding: 10mm; width: 100%; }
-            body { background: white; }
+            body { overflow: visible; background-color: #fff; height: auto; }
+            .invoice-preview { box-shadow: none; margin: 0; padding: 10mm; width: 100%; min-height: auto;}
+            aside { display: none !important; }
+            main { padding: 0 !important; background-color: transparent !important; overflow: visible !important;}
         }
     </style>
 </head>
-<body class="bg-gray-100 p-4 flex flex-col lg:flex-row gap-6">
+<body class="flex flex-col lg:flex-row">
 
-    <!-- Form Section (Left) -->
-    <div class="w-full lg:w-1/3 bg-white p-6 rounded shadow no-print h-screen overflow-y-auto">
-        <h2 class="text-2xl font-bold mb-4">Invoice Details</h2>
+    <aside class="w-full lg:w-[450px] h-[40vh] lg:h-full bg-white border-r border-slate-300 flex flex-col shadow-xl z-10 flex-shrink-0">
+        <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
+            <h1 class="text-md font-bold tracking-wide">Invoice Editor</h1>
+            <button onclick="generatePDF()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-1.5 px-4 rounded transition-colors active:scale-95">
+                Download PDF
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-5 bg-slate-50">
+            
+            <section class="bg-white p-4 rounded shadow-sm border border-slate-200">
+                <h2 class="text-xs font-bold text-slate-500 uppercase mb-3">Header Details</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Proprietor Name</label>
+                        <input type="text" id="in-proprietor" value="B. Srinivas" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Mobile Number</label>
+                        <input type="text" id="in-mobile" value="6305322569" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-blue-500">
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white p-4 rounded shadow-sm border border-slate-200">
+                <h2 class="text-xs font-bold text-slate-500 uppercase mb-3">Invoice Details</h2>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Bill To</label>
+                        <input type="text" id="in-billTo" value="Srinivas" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Invoice No.</label>
+                            <input type="text" id="in-invNo" value="27" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Date</label>
+                            <input type="text" id="in-date" value="05/07/2026" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white p-4 rounded shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xs font-bold text-slate-500 uppercase">Line Items</h2>
+                    <button onclick="addItem()" class="text-[11px] bg-slate-800 text-white hover:bg-slate-700 py-1 px-2 rounded font-bold transition">+ Add Item</button>
+                </div>
+                <div id="items-container" class="space-y-3">
+                    <!-- Items injected here by JS -->
+                </div>
+            </section>
+
+            <section class="bg-white p-4 rounded shadow-sm border border-slate-200">
+                <h2 class="text-xs font-bold text-slate-500 uppercase mb-3">Additional Costs</h2>
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-700 mb-1">Transport Charges (₹)</label>
+                    <input type="number" id="in-transport" value="2000" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-blue-500">
+                </div>
+            </section>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto bg-slate-200 p-4 lg:p-8 flex justify-center custom-scrollbar h-[60vh] lg:h-full">
         
-        <div class="mb-4">
-            <label class="block text-sm font-bold mb-1">Bill To (Name)</label>
-            <input type="text" id="billTo" class="w-full border p-2 rounded" value="Srinivas" oninput="updateInvoice()">
-        </div>
-        <div class="mb-4">
-            <label class="block text-sm font-bold mb-1">Invoice No.</label>
-            <input type="text" id="invNo" class="w-full border p-2 rounded" value="27" oninput="updateInvoice()">
-        </div>
-        <div class="mb-4">
-            <label class="block text-sm font-bold mb-1">Date</label>
-            <input type="text" id="invDate" class="w-full border p-2 rounded" value="05/07/2026" oninput="updateInvoice()">
-        </div>
-
-        <h3 class="text-xl font-bold mt-6 mb-2">Items</h3>
-        <div id="itemsContainer"></div>
-        <button onclick="addItem()" class="bg-blue-500 text-white px-4 py-2 rounded mt-2 hover:bg-blue-600">+ Add Item</button>
-
-        <div class="mt-6 mb-4">
-            <label class="block text-sm font-bold mb-1">Transport Charges</label>
-            <input type="number" id="transport" class="w-full border p-2 rounded" value="2000" oninput="updateInvoice()">
-        </div>
-
-        <button onclick="generatePDF()" class="bg-green-600 text-white w-full py-3 rounded mt-4 font-bold hover:bg-green-700 text-lg">Download PDF</button>
-    </div>
-
-    <!-- Preview Section (Right) -->
-    <div class="w-full lg:w-2/3 flex justify-center overflow-x-auto">
-        <div id="invoice-preview" class="invoice-container">
-            <!-- Header (Fixed) -->
-            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; margin-bottom: 5px;">
-                <div>Proprietor: B. Srinivas</div>
-                <div style="font-family: Arial, sans-serif;">Mobile: 6305322569</div>
+        <div id="invoice-document" class="invoice-preview">
+            
+            <!-- 1. Top Header -->
+            <div class="flex justify-between text-[14px] mb-2">
+                <div>Proprietor: <span id="out-proprietor">B. Srinivas</span></div>
+                <div>Mobile: <span id="out-mobile">6305322569</span></div>
             </div>
 
-            <!-- Company Name (Fixed) -->
-            <div style="text-align: center; margin-bottom: 10px;">
-                <h1 style="color: red; margin: 0; font-size: 28px; font-weight: bold;">KISSAN IRRIGATIONS</h1>
-                <h2 style="color: red; margin: 5px 0; font-size: 18px; font-weight: bold;">(SWIMMING POOL AND FOUNTAINS)</h2>
-                <p style="margin: 0; font-size: 12px;">Injapur, Beside SS School, Hyderabad, Telangana-501510.</p>
-            </div>
-
-            <!-- Invoice Heading and Date -->
-            <div style="text-align: center; position: relative; margin-bottom: 15px; margin-top: 15px;">
-                <h3 style="margin: 0; font-size: 18px; text-decoration: underline; font-weight: bold;">INVOICE</h3>
-                <div style="position: absolute; right: 0; top: 20px; font-size: 14px;">
-                    Date: <span id="outDate">05/07/2026</span>
+            <!-- 2. Main Header (Centered) -->
+            <div class="text-center mb-4">
+                <div class="text-[28px] font-bold text-red-header tracking-wide mb-1 leading-none">KISSAN IRRIGATIONS</div>
+                <div class="text-[18px] font-bold text-red-header leading-tight mb-1">(SWIMMING POOL AND FOUNTAINS)</div>
+                <div class="text-[12px]">Injapur, Beside SS School, Hyderabad, Telangana-501510.</div>
+                
+                <div class="mt-4 flex justify-between items-end">
+                    <div class="w-1/3"></div> <!-- Left spacer to maintain center alignment -->
+                    <div class="text-[18px] font-bold underline w-1/3 text-center">INVOICE</div>
+                    <div class="w-1/3 text-right text-[14px] font-normal">Date: <span id="out-date">05/07/2026</span></div>
                 </div>
             </div>
 
-            <!-- Bill To & Invoice No -->
-            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px;">
-                <div>
-                    <div style="font-weight: bold; text-decoration: underline;">BILL TO</div>
-                    <div id="outBillTo" style="margin-top: 5px;">Srinivas</div>
+            <!-- 3. Bill To & Invoice Details -->
+            <div class="flex border-black-all text-[14px] mb-4">
+                <div class="w-1/2 p-2 border-r border-black flex flex-col">
+                    <div class="font-bold border-b border-black pb-1 mb-2">BILL TO</div>
+                    <div id="out-billTo" class="mt-1">Srinivas</div>
                 </div>
-                <div>
-                    <div style="font-weight: bold; text-decoration: underline;">INVOICE DETAILS</div>
-                    <div style="margin-top: 5px;">Invoice No.: <span id="outInvNo">27</span></div>
+                <div class="w-1/2 p-2 flex flex-col">
+                    <div class="font-bold border-b border-black pb-1 mb-2">INVOICE DETAILS</div>
+                    <div class="mt-1">Invoice No.: <span id="out-invNo">27</span></div>
                 </div>
             </div>
 
-            <!-- Table -->
-            <table class="invoice-table" id="outTable">
+            <!-- 4. Table -->
+            <table class="invoice-table">
                 <thead>
                     <tr>
-                        <th style="width: 8%;">S.No.</th>
-                        <th style="width: 35%;">Item Description</th>
-                        <th style="width: 12%;">Size</th>
-                        <th style="width: 10%;">Qty</th>
-                        <th style="width: 15%;">Rate</th>
-                        <th style="width: 20%;">Amount</th>
+                        <th class="text-center w-[8%]">S.No.</th>
+                        <th class="w-[37%]">Item Description</th>
+                        <th class="text-center w-[15%]">Size</th>
+                        <th class="text-center w-[10%]">Qty</th>
+                        <th class="text-right w-[12%]">Rate</th>
+                        <th class="text-right w-[18%]">Amount</th>
                     </tr>
                 </thead>
-                <tbody id="outTableBody">
+                <tbody id="out-table-body">
+                    <!-- JS generated rows -->
                 </tbody>
+                <tfoot id="out-table-foot">
+                    <!-- JS generated totals -->
+                </tfoot>
             </table>
 
-            <!-- Totals Footer -->
-            <table class="footer-table">
-                <tr>
-                    <td class="totals-label">Total</td>
-                    <td class="totals-value" id="outSubTotal">0</td>
-                </tr>
-                <tr>
-                    <td class="totals-label">Transport Charges</td>
-                    <td class="totals-value" id="outTransport">2000</td>
-                </tr>
-                <tr>
-                    <td class="totals-label" style="font-size: 16px;">GRAND TOTAL</td>
-                    <td class="totals-value" id="outGrandTotal" style="font-size: 16px;">0</td>
-                </tr>
-            </table>
+            <!-- 5. Amount in Words -->
+            <div class="words-section">
+                <div class="words-label">Amount in Words</div>
+                <div class="words-value" id="out-words">Rupees Zero Only</div>
+            </div>
 
-            <!-- Amount in words -->
-            <table class="footer-table" style="border-top: none;">
-                <tr>
-                    <td style="width: 20%; font-weight: bold; text-align: center;">Amount in<br>Words</td>
-                    <td style="width: 80%; font-weight: bold;" class="left-align" id="outWords">Rupees Zero Only</td>
-                </tr>
-            </table>
+            <!-- 6. Spacer to push footer to bottom -->
+            <div class="flex-grow"></div>
 
-            <!-- Footer Message -->
-            <div style="margin-top: 40px; font-weight: bold; font-size: 14px;">
+            <!-- 7. Footer -->
+            <div class="text-center text-[14px] mt-8 mb-4">
                 Thank you for your business.
             </div>
+
         </div>
-    </div>
+    </main>
 
     <script>
+        // Exact default items based on user specification
         let items = [
-            { desc: 'Sprinklers', size: '6"', qty: 14, rate: 1750 },
-            { desc: 'Sprinkler joints', size: '3/4', qty: 14, rate: 275 },
-            { desc: 'Sprinklers adapter', size: '3/4', qty: 14, rate: 320 },
-            { desc: 'Ball Valves', size: '2"', qty: 5, rate: 720 },
-            { desc: 'Cleaning Valves', size: '2"', qty: 4, rate: 190 },
-            { desc: 'Filter', size: '3"', qty: 1, rate: 7500 },
-            { desc: 'L.d pipe', size: '16mm', qty: 2, rate: 7800 },
-            { desc: 'Emitter', size: '480Lps', qty: 800, rate: 4 }
+            { id: 1, description: 'Sprinklers', size: '6"', qty: 14, rate: 1750 },
+            { id: 2, description: 'Sprinkler joints', size: '3/4', qty: 14, rate: 275 },
+            { id: 3, description: 'Sprinklers adapter', size: '3/4', qty: 14, rate: 320 },
+            { id: 4, description: 'Ball Valves', size: '2"', qty: 5, rate: 720 },
+            { id: 5, description: 'Cleaning Valves', size: '2"', qty: 4, rate: 190 },
+            { id: 6, description: 'Filter', size: '3"', qty: 1, rate: 7500 },
+            { id: 7, description: 'L.d pipe', size: '16mm', qty: 2, rate: 7800 },
+            { id: 8, description: 'Emitter', size: '480Lps', qty: 800, rate: 4 },
         ];
+        let nextId = 9;
 
+        // Number formatter with standard en-IN formatting
+        const formatCurrency = (num) => {
+            return new Intl.NumberFormat('en-IN').format(num);
+        };
+
+        // Indian Numbering System to Words Converter
+        function numberToIndianWords(num) {
+            if (num === 0) return "Rupees Zero Only";
+            
+            const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            
+            let str = Math.floor(num).toString();
+            if (str.length > 9) return "Amount too large";
+
+            let n = ('000000000' + str).slice(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+            if (!n) return '';
+            
+            let out = '';
+            out += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + ' Crore ' : '';
+            out += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + ' Lakh ' : '';
+            out += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + ' Thousand ' : '';
+            out += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + ' Hundred ' : '';
+            
+            let lastTwo = Number(n[5]);
+            if (lastTwo != 0) {
+                out += (out != '') ? '' : ''; // In Indian context, 'and' is often omitted or optional
+                out += (a[lastTwo] || b[n[5][0]] + ' ' + (n[5][1] != 0 ? a[n[5][1]] : '')) + ' ';
+            }
+            
+            // Clean up multiple spaces and add prefix/suffix
+            return "Rupees " + out.replace(/\s+/g, ' ').trim() + " Only";
+        }
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            renderFormItems();
+            updatePreview();
+        });
+
+        // Add blank row
+        function addItem() {
+            items.push({ id: nextId++, description: '', size: '', qty: 1, rate: 0 });
+            renderFormItems();
+            updatePreview();
+            document.getElementById('items-container').parentElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
+        // Remove row
+        function removeItem(id) {
+            items = items.filter(item => item.id !== id);
+            renderFormItems();
+            updatePreview();
+        }
+
+        // Update state based on input
+        function handleItemChange(id, field, value) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                if (field === 'qty' || field === 'rate') {
+                    item[field] = value === '' ? 0 : Number(value);
+                } else {
+                    item[field] = value;
+                }
+                updatePreview();
+            }
+        }
+
+        // Render the left sidebar inputs
         function renderFormItems() {
-            const container = document.getElementById('itemsContainer');
+            const container = document.getElementById('items-container');
             container.innerHTML = '';
+            
             items.forEach((item, index) => {
-                container.innerHTML += `
-                    <div class="border p-3 mb-2 rounded bg-gray-50 relative">
-                        <button onclick="removeItem(${index})" class="absolute top-2 right-2 text-red-500 font-bold hover:text-red-700">X</button>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="text-xs">Description</label>
-                                <input type="text" class="w-full border p-1" value="${item.desc}" oninput="updateItem(${index}, 'desc', this.value)">
+                const row = document.createElement('div');
+                row.className = 'bg-white border border-slate-300 rounded p-2 relative shadow-sm';
+                row.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">Row ${index + 1}</span>
+                        <button onclick="removeItem(${item.id})" class="text-red-500 hover:text-red-700 text-[11px] font-bold" title="Remove">✕</button>
+                    </div>
+                    <div class="space-y-2">
+                        <input type="text" placeholder="Item Description" value="${item.description}" oninput="handleItemChange(${item.id}, 'description', this.value)" class="w-full text-xs border border-slate-300 rounded px-2 py-1 outline-none focus:border-blue-500">
+                        <div class="flex gap-2">
+                            <div class="w-1/3">
+                                <input type="text" placeholder="Size" value="${item.size}" oninput="handleItemChange(${item.id}, 'size', this.value)" class="w-full text-xs border border-slate-300 rounded px-2 py-1 outline-none focus:border-blue-500">
                             </div>
-                            <div>
-                                <label class="text-xs">Size</label>
-                                <input type="text" class="w-full border p-1" value="${item.size}" oninput="updateItem(${index}, 'size', this.value)">
+                            <div class="w-1/3">
+                                <input type="number" placeholder="Qty" value="${item.qty}" oninput="handleItemChange(${item.id}, 'qty', this.value)" class="w-full text-xs border border-slate-300 rounded px-2 py-1 outline-none focus:border-blue-500">
                             </div>
-                            <div>
-                                <label class="text-xs">Qty</label>
-                                <input type="number" class="w-full border p-1" value="${item.qty}" oninput="updateItem(${index}, 'qty', this.value)">
-                            </div>
-                            <div>
-                                <label class="text-xs">Rate</label>
-                                <input type="number" class="w-full border p-1" value="${item.rate}" oninput="updateItem(${index}, 'rate', this.value)">
+                            <div class="w-1/3">
+                                <input type="number" placeholder="Rate" value="${item.rate}" oninput="handleItemChange(${item.id}, 'rate', this.value)" class="w-full text-xs border border-slate-300 rounded px-2 py-1 outline-none focus:border-blue-500">
                             </div>
                         </div>
                     </div>
                 `;
+                container.appendChild(row);
             });
-            updateInvoice();
         }
 
-        function addItem() {
-            items.push({ desc: '', size: '', qty: 1, rate: 0 });
-            renderFormItems();
-        }
-
-        function removeItem(index) {
-            items.splice(index, 1);
-            renderFormItems();
-        }
-
-        function updateItem(index, field, value) {
-            items[index][field] = field === 'qty' || field === 'rate' ? Number(value) : value;
-            updateInvoice();
-        }
-
-        function formatNumber(num) {
-            return num.toLocaleString('en-IN');
-        }
-
-        function updateInvoice() {
-            document.getElementById('outBillTo').innerText = document.getElementById('billTo').value || '-';
-            document.getElementById('outInvNo').innerText = document.getElementById('invNo').value || '-';
-            document.getElementById('outDate').innerText = document.getElementById('invDate').value || '-';
+        // Render the right A4 preview
+        function updatePreview() {
+            // Header Text
+            document.getElementById('out-proprietor').textContent = document.getElementById('in-proprietor').value;
+            document.getElementById('out-mobile').textContent = document.getElementById('in-mobile').value;
+            document.getElementById('out-billTo').textContent = document.getElementById('in-billTo').value;
+            document.getElementById('out-invNo').textContent = document.getElementById('in-invNo').value;
+            document.getElementById('out-date').textContent = document.getElementById('in-date').value;
             
-            const tbody = document.getElementById('outTableBody');
-            tbody.innerHTML = '';
-            let subTotal = 0;
+            const transport = Number(document.getElementById('in-transport').value) || 0;
 
+            const tbody = document.getElementById('out-table-body');
+            tbody.innerHTML = '';
+            
+            let itemsTotal = 0;
+
+            // Render Table Rows
             items.forEach((item, index) => {
                 const amount = item.qty * item.rate;
-                subTotal += amount;
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${String(index + 1).padStart(2, '0')}</td>
-                        <td class="left-align">${item.desc}</td>
-                        <td>${item.size}</td>
-                        <td>${item.qty}</td>
-                        <td>${formatNumber(item.rate)}</td>
-                        <td>${formatNumber(amount)}</td>
-                    </tr>
+                itemsTotal += amount;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-center">${(index + 1).toString().padStart(2, '0')}</td>
+                    <td>${item.description}</td>
+                    <td class="text-center">${item.size}</td>
+                    <td class="text-center">${item.qty}</td>
+                    <td class="text-right">${formatCurrency(item.rate)}</td>
+                    <td class="text-right">${formatCurrency(amount)}</td>
                 `;
+                tbody.appendChild(tr);
             });
 
-            const transport = Number(document.getElementById('transport').value) || 0;
-            const grandTotal = subTotal + transport;
+            // Render Table Footer
+            const tfoot = document.getElementById('out-table-foot');
+            const grandTotal = itemsTotal + transport;
+            
+            tfoot.innerHTML = `
+                <tr>
+                    <td colspan="5" class="totals-label">Total</td>
+                    <td class="text-right">${formatCurrency(itemsTotal)}</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="totals-label">Transport Charges</td>
+                    <td class="text-right">${formatCurrency(transport)}</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="totals-label font-bold uppercase">GRAND TOTAL</td>
+                    <td class="text-right font-bold">${formatCurrency(grandTotal)}</td>
+                </tr>
+            `;
 
-            document.getElementById('outSubTotal').innerText = formatNumber(subTotal);
-            document.getElementById('outTransport').innerText = formatNumber(transport);
-            document.getElementById('outGrandTotal').innerText = formatNumber(grandTotal);
-            document.getElementById('outWords').innerText = "Rupees " + numberToWords(grandTotal) + " Only";
+            // Render Words
+            document.getElementById('out-words').textContent = numberToIndianWords(grandTotal);
         }
 
-        function numberToWords(num) {
-            if (num === 0) return "Zero";
-            const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
-            const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-
-            if ((num = num.toString()).length > 9) return 'overflow';
-            let n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-            if (!n) return; let str = '';
-            str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
-            str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
-            str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
-            str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
-            str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
-            return str.trim();
-        }
-
+        // html2pdf Export Logic
         function generatePDF() {
-            const element = document.getElementById('invoice-preview');
+            const element = document.getElementById('invoice-document');
+            const invNo = document.getElementById('in-invNo').value || 'Draft';
+            
             const opt = {
                 margin:       0,
-                filename:     'Kissan_Irrigations_Invoice.pdf',
+                filename:     `Invoice_${invNo}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
+            
             html2pdf().set(opt).from(element).save();
         }
-
-        // Init
-        renderFormItems();
     </script>
 </body>
 </html>
