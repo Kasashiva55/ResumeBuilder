@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Professional Invoice Generator</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,7 +13,6 @@
             background-color: #f1f5f9;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             margin: 0;
-            height: 100vh;
             overflow: hidden; 
         }
 
@@ -22,7 +21,6 @@
             width: 210mm;
             min-height: 297mm;
             background: #ffffff;
-            margin: 20px auto;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             position: relative;
             font-family: Arial, Helvetica, sans-serif; 
@@ -31,16 +29,12 @@
             padding: 15mm 20mm; /* Standard margins */
             display: flex;
             flex-direction: column;
+            flex-shrink: 0;
         }
 
         /* Invoice specific styling */
-        .text-red-header {
-            color: #ff0000;
-        }
-
-        .border-black-all {
-            border: 1px solid #000;
-        }
+        .text-red-header { color: #ff0000; }
+        .border-black-all { border: 1px solid #000; }
 
         /* Strict table borders */
         .invoice-table {
@@ -63,14 +57,10 @@
         }
         
         .invoice-table th.text-center, 
-        .invoice-table td.text-center {
-            text-align: center;
-        }
-
+        .invoice-table td.text-center { text-align: center; }
+        
         .invoice-table th.text-right, 
-        .invoice-table td.text-right {
-            text-align: right;
-        }
+        .invoice-table td.text-right { text-align: right; }
 
         .totals-label {
             text-align: right;
@@ -82,7 +72,7 @@
         .words-section {
             display: flex;
             border: 1px solid #000;
-            border-top: none; /* Connects smoothly to table if placed right below */
+            border-top: none; 
             font-size: 14px;
         }
         
@@ -99,26 +89,36 @@
         }
 
         /* Custom scrollbars */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
+        /* Remove number input arrows for cleaner mobile UI */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
         /* Print rules */
         @media print {
-            body { overflow: visible; background-color: #fff; height: auto; }
+            body { overflow: visible !important; background-color: #fff; height: auto !important; }
             .invoice-preview { box-shadow: none; margin: 0; padding: 10mm; width: 100%; min-height: auto;}
             aside { display: none !important; }
             main { padding: 0 !important; background-color: transparent !important; overflow: visible !important;}
+            .m-auto { margin: 0 !important; }
+            .w-max { width: 100% !important; }
         }
     </style>
 </head>
-<body class="flex flex-col lg:flex-row">
+<body class="flex flex-col lg:flex-row h-[100dvh]">
 
-    <aside class="w-full lg:w-[450px] h-[40vh] lg:h-full bg-white border-r border-slate-300 flex flex-col shadow-xl z-10 flex-shrink-0">
-        <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
-            <h1 class="text-md font-bold tracking-wide">Invoice Editor</h1>
-            <button onclick="generatePDF()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-1.5 px-4 rounded transition-colors active:scale-95">
+    <!-- Editor Sidebar -->
+    <aside class="w-full lg:w-[450px] h-[55dvh] lg:h-full bg-white border-r border-slate-300 flex flex-col shadow-xl z-20 flex-shrink-0">
+        <div class="p-4 bg-slate-900 text-white flex justify-between items-center shrink-0">
+            <h1 class="text-sm lg:text-md font-bold tracking-wide">Invoice Editor</h1>
+            <button onclick="generatePDF()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs lg:text-sm font-bold py-2 px-4 rounded transition-colors active:scale-95 shadow-md">
                 Download PDF
             </button>
         </div>
@@ -126,34 +126,34 @@
         <div class="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-5 bg-slate-50">
             
             <section class="bg-white p-4 rounded shadow-sm border border-slate-200">
-                <h2 class="text-xs font-bold text-slate-500 uppercase mb-3">Header Details</h2>
+                <h2 class="text-xs font-bold text-slate-500 uppercase mb-3 tracking-wider">Header Details</h2>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Proprietor Name</label>
-                        <input type="text" id="in-proprietor" value="B. Srinivas" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Proprietor Name</label>
+                        <input type="text" id="in-proprietor" value="B. Srinivas" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Mobile Number</label>
-                        <input type="text" id="in-mobile" value="6305322569" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Mobile Number</label>
+                        <input type="tel" id="in-mobile" value="6305322569" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
                     </div>
                 </div>
             </section>
 
             <section class="bg-white p-4 rounded shadow-sm border border-slate-200">
-                <h2 class="text-xs font-bold text-slate-500 uppercase mb-3">Invoice Details</h2>
+                <h2 class="text-xs font-bold text-slate-500 uppercase mb-3 tracking-wider">Invoice Details</h2>
                 <div class="space-y-3">
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Bill To</label>
-                        <input type="text" id="in-billTo" value="" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Bill To</label>
+                        <input type="text" id="in-billTo" value="" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Invoice No.</label>
-                            <input type="text" id="in-invNo" value="" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-blue-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Invoice No.</label>
+                            <input type="text" id="in-invNo" value="" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Date</label>
-                            <input type="text" id="in-date" value="" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-blue-500">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Date</label>
+                            <input type="text" id="in-date" value="" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
                         </div>
                     </div>
                 </div>
@@ -161,8 +161,8 @@
 
             <section class="bg-white p-4 rounded shadow-sm border border-slate-200">
                 <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-xs font-bold text-slate-500 uppercase">Line Items</h2>
-                    <button onclick="addItem()" class="text-[11px] bg-slate-800 text-white hover:bg-slate-700 py-1 px-2 rounded font-bold transition">+ Add Item</button>
+                    <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Line Items</h2>
+                    <button onclick="addItem()" class="text-xs bg-slate-800 text-white hover:bg-slate-700 py-1.5 px-3 rounded font-bold transition shadow-sm">+ Add Item</button>
                 </div>
                 <div id="items-container" class="space-y-3">
                     <!-- Items injected here by JS -->
@@ -170,100 +170,102 @@
             </section>
 
             <section class="bg-white p-4 rounded shadow-sm border border-slate-200">
-                <h2 class="text-xs font-bold text-slate-500 uppercase mb-3">Additional Costs</h2>
+                <h2 class="text-xs font-bold text-slate-500 uppercase mb-3 tracking-wider">Additional Costs</h2>
                 <div>
-                    <label class="block text-[11px] font-semibold text-slate-700 mb-1">Transport Charges (₹)</label>
-                    <input type="number" id="in-transport" value="" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-blue-500">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Transport Charges (₹)</label>
+                    <input type="number" id="in-transport" value="" oninput="updatePreview()" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
                 </div>
             </section>
         </div>
     </aside>
 
-    <main class="flex-1 overflow-y-auto bg-slate-200 p-4 lg:p-8 flex justify-center custom-scrollbar h-[60vh] lg:h-full">
+    <!-- A4 Document Preview -->
+    <main class="flex-1 h-[45dvh] lg:h-full bg-slate-200 overflow-auto flex flex-col p-4 lg:p-8 custom-scrollbar relative z-10">
         
-        <div id="invoice-document" class="invoice-preview">
+        <!-- Wrapper handles mobile scrolling without cutting off the left edge -->
+        <div class="m-auto w-max">
             
-            <!-- 1. Top Header -->
-            <div class="flex justify-between text-[14px] mb-2">
-                <div>Proprietor: <span id="out-proprietor">B. Srinivas</span></div>
-                <div>Mobile: <span id="out-mobile">6305322569</span></div>
-            </div>
-
-            <!-- 2. Main Header (Centered) -->
-            <div class="text-center mb-4">
-                <div class="text-[28px] font-bold text-red-header tracking-wide mb-1 leading-none">KISSAN IRRIGATIONS</div>
-                <div class="text-[18px] font-bold text-red-header leading-tight mb-1">(SWIMMING POOL AND FOUNTAINS)</div>
-                <div class="text-[12px]">Injapur, Beside SS School, Hyderabad, Telangana-501510.</div>
+            <div id="invoice-document" class="invoice-preview">
                 
-                <div class="mt-4 flex justify-between items-end">
-                    <div class="w-1/3"></div> <!-- Left spacer to maintain center alignment -->
-                    <div class="text-[18px] font-bold underline w-1/3 text-center">INVOICE</div>
-                    <div class="w-1/3 text-right text-[14px] font-normal">Date: <span id="out-date"></span></div>
+                <!-- 1. Top Header -->
+                <div class="flex justify-between text-[14px] mb-2">
+                    <div>Proprietor: <span id="out-proprietor" class="font-semibold">B. Srinivas</span></div>
+                    <div>Mobile: <span id="out-mobile" class="font-semibold">6305322569</span></div>
                 </div>
-            </div>
 
-            <!-- 3. Bill To & Invoice Details -->
-            <div class="flex border-black-all text-[14px] mb-4">
-                <div class="w-1/2 p-2 border-r border-black flex flex-col">
-                    <div class="font-bold border-b border-black pb-1 mb-2">BILL TO</div>
-                    <div id="out-billTo" class="mt-1"></div>
+                <!-- 2. Main Header (Centered) -->
+                <div class="text-center mb-4">
+                    <div class="text-[28px] font-bold text-red-header tracking-wide mb-1 leading-none">KISSAN IRRIGATIONS</div>
+                    <div class="text-[18px] font-bold text-red-header leading-tight mb-1">(SWIMMING POOL AND FOUNTAINS)</div>
+                    <div class="text-[12px]">Injapur, Beside SS School, Hyderabad, Telangana-501510.</div>
+                    
+                    <div class="mt-4 flex justify-between items-end">
+                        <div class="w-1/3"></div> 
+                        <div class="text-[18px] font-bold underline w-1/3 text-center">INVOICE</div>
+                        <div class="w-1/3 text-right text-[14px] font-normal">Date: <span id="out-date" class="font-semibold"></span></div>
+                    </div>
                 </div>
-                <div class="w-1/2 p-2 flex flex-col">
-                    <div class="font-bold border-b border-black pb-1 mb-2">INVOICE DETAILS</div>
-                    <div class="mt-1">Invoice No.: <span id="out-invNo"></span></div>
+
+                <!-- 3. Bill To & Invoice Details -->
+                <div class="flex border-black-all text-[14px] mb-4">
+                    <div class="w-1/2 p-2 border-r border-black flex flex-col">
+                        <div class="font-bold border-b border-black pb-1 mb-2">BILL TO</div>
+                        <div id="out-billTo" class="mt-1 min-h-[20px] font-semibold uppercase"></div>
+                    </div>
+                    <div class="w-1/2 p-2 flex flex-col">
+                        <div class="font-bold border-b border-black pb-1 mb-2">INVOICE DETAILS</div>
+                        <div class="mt-1">Invoice No.: <span id="out-invNo" class="font-semibold"></span></div>
+                    </div>
                 </div>
+
+                <!-- 4. Table -->
+                <table class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th class="text-center w-[8%]">S.No.</th>
+                            <th class="w-[37%]">Item Description</th>
+                            <th class="text-center w-[15%]">Size</th>
+                            <th class="text-center w-[10%]">Qty</th>
+                            <th class="text-right w-[12%]">Rate</th>
+                            <th class="text-right w-[18%]">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="out-table-body">
+                        <!-- JS generated rows -->
+                    </tbody>
+                    <tfoot id="out-table-foot">
+                        <!-- JS generated totals -->
+                    </tfoot>
+                </table>
+
+                <!-- 5. Amount in Words -->
+                <div class="words-section">
+                    <div class="words-label">Amount in Words</div>
+                    <div class="words-value font-semibold uppercase text-[13px]" id="out-words">Rupees Zero Only</div>
+                </div>
+
+                <!-- 6. Spacer -->
+                <div class="flex-grow"></div>
+
+                <!-- 7. Footer -->
+                <div class="text-center text-[14px] mt-8 mb-4">
+                    Thank you for your business.
+                </div>
+
             </div>
-
-            <!-- 4. Table -->
-            <table class="invoice-table">
-                <thead>
-                    <tr>
-                        <th class="text-center w-[8%]">S.No.</th>
-                        <th class="w-[37%]">Item Description</th>
-                        <th class="text-center w-[15%]">Size</th>
-                        <th class="text-center w-[10%]">Qty</th>
-                        <th class="text-right w-[12%]">Rate</th>
-                        <th class="text-right w-[18%]">Amount</th>
-                    </tr>
-                </thead>
-                <tbody id="out-table-body">
-                    <!-- JS generated rows -->
-                </tbody>
-                <tfoot id="out-table-foot">
-                    <!-- JS generated totals -->
-                </tfoot>
-            </table>
-
-            <!-- 5. Amount in Words -->
-            <div class="words-section">
-                <div class="words-label">Amount in Words</div>
-                <div class="words-value" id="out-words">Rupees Zero Only</div>
-            </div>
-
-            <!-- 6. Spacer to push footer to bottom -->
-            <div class="flex-grow"></div>
-
-            <!-- 7. Footer -->
-            <div class="text-center text-[14px] mt-8 mb-4">
-                Thank you for your business.
-            </div>
-
         </div>
     </main>
 
     <script>
-        // Start with a single blank item
         let items = [
             { id: 1, description: '', size: '', qty: 1, rate: 0 }
         ];
         let nextId = 2;
 
-        // Number formatter with standard en-IN formatting
         const formatCurrency = (num) => {
             return new Intl.NumberFormat('en-IN').format(num);
         };
 
-        // Indian Numbering System to Words Converter
         function numberToIndianWords(num) {
             if (num === 0) return "Rupees Zero Only";
             
@@ -284,36 +286,36 @@
             
             let lastTwo = Number(n[5]);
             if (lastTwo != 0) {
-                out += (out != '') ? '' : ''; // In Indian context, 'and' is often omitted or optional
+                out += (out != '') ? '' : '';
                 out += (a[lastTwo] || b[n[5][0]] + ' ' + (n[5][1] != 0 ? a[n[5][1]] : '')) + ' ';
             }
             
-            // Clean up multiple spaces and add prefix/suffix
             return "Rupees " + out.replace(/\s+/g, ' ').trim() + " Only";
         }
 
-        // Initialize App
         window.addEventListener('DOMContentLoaded', () => {
             renderFormItems();
             updatePreview();
         });
 
-        // Add blank row
         function addItem() {
             items.push({ id: nextId++, description: '', size: '', qty: 1, rate: 0 });
             renderFormItems();
             updatePreview();
-            document.getElementById('items-container').parentElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            
+            // Scroll editor down to new item smoothly
+            setTimeout(() => {
+                const container = document.getElementById('items-container');
+                container.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 50);
         }
 
-        // Remove row
         function removeItem(id) {
             items = items.filter(item => item.id !== id);
             renderFormItems();
             updatePreview();
         }
 
-        // Update state based on input
         function handleItemChange(id, field, value) {
             const item = items.find(i => i.id === id);
             if (item) {
@@ -326,31 +328,27 @@
             }
         }
 
-        // Render the left sidebar inputs
         function renderFormItems() {
             const container = document.getElementById('items-container');
             container.innerHTML = '';
             
             items.forEach((item, index) => {
                 const row = document.createElement('div');
-                row.className = 'bg-white border border-slate-300 rounded p-2 relative shadow-sm';
+                row.className = 'bg-white border border-slate-300 rounded p-3 relative shadow-sm transition-all';
                 row.innerHTML = `
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">Row ${index + 1}</span>
-                        <button onclick="removeItem(${item.id})" class="text-red-500 hover:text-red-700 text-[11px] font-bold" title="Remove">✕</button>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded">Row ${index + 1}</span>
+                        <button onclick="removeItem(${item.id})" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition text-xs font-bold flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            Remove
+                        </button>
                     </div>
-                    <div class="space-y-2">
-                        <input type="text" placeholder="Item Description" value="${item.description}" oninput="handleItemChange(${item.id}, 'description', this.value)" class="w-full text-xs border border-slate-300 rounded px-2 py-1 outline-none focus:border-blue-500">
-                        <div class="flex gap-2">
-                            <div class="w-1/3">
-                                <input type="text" placeholder="Size" value="${item.size}" oninput="handleItemChange(${item.id}, 'size', this.value)" class="w-full text-xs border border-slate-300 rounded px-2 py-1 outline-none focus:border-blue-500">
-                            </div>
-                            <div class="w-1/3">
-                                <input type="number" placeholder="Qty" value="${item.qty}" oninput="handleItemChange(${item.id}, 'qty', this.value)" class="w-full text-xs border border-slate-300 rounded px-2 py-1 outline-none focus:border-blue-500">
-                            </div>
-                            <div class="w-1/3">
-                                <input type="number" placeholder="Rate" value="${item.rate}" oninput="handleItemChange(${item.id}, 'rate', this.value)" class="w-full text-xs border border-slate-300 rounded px-2 py-1 outline-none focus:border-blue-500">
-                            </div>
+                    <div class="space-y-3">
+                        <input type="text" placeholder="Item Description" value="${item.description}" oninput="handleItemChange(${item.id}, 'description', this.value)" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="text" placeholder="Size" value="${item.size}" oninput="handleItemChange(${item.id}, 'size', this.value)" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
+                            <input type="number" placeholder="Qty" value="${item.qty}" oninput="handleItemChange(${item.id}, 'qty', this.value)" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
+                            <input type="number" placeholder="Rate" value="${item.rate}" oninput="handleItemChange(${item.id}, 'rate', this.value)" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
                         </div>
                     </div>
                 `;
@@ -358,9 +356,7 @@
             });
         }
 
-        // Render the right A4 preview
         function updatePreview() {
-            // Header Text
             document.getElementById('out-proprietor').textContent = document.getElementById('in-proprietor').value;
             document.getElementById('out-mobile').textContent = document.getElementById('in-mobile').value;
             document.getElementById('out-billTo').textContent = document.getElementById('in-billTo').value;
@@ -374,7 +370,6 @@
             
             let itemsTotal = 0;
 
-            // Render Table Rows
             items.forEach((item, index) => {
                 const amount = item.qty * item.rate;
                 itemsTotal += amount;
@@ -391,18 +386,17 @@
                 tbody.appendChild(tr);
             });
 
-            // Render Table Footer
             const tfoot = document.getElementById('out-table-foot');
             const grandTotal = itemsTotal + transport;
             
             tfoot.innerHTML = `
                 <tr>
                     <td colspan="5" class="totals-label">Total</td>
-                    <td class="text-right">${formatCurrency(itemsTotal)}</td>
+                    <td class="text-right font-semibold">${formatCurrency(itemsTotal)}</td>
                 </tr>
                 <tr>
                     <td colspan="5" class="totals-label">Transport Charges</td>
-                    <td class="text-right">${formatCurrency(transport)}</td>
+                    <td class="text-right font-semibold">${formatCurrency(transport)}</td>
                 </tr>
                 <tr>
                     <td colspan="5" class="totals-label font-bold uppercase">GRAND TOTAL</td>
@@ -410,11 +404,9 @@
                 </tr>
             `;
 
-            // Render Words
             document.getElementById('out-words').textContent = numberToIndianWords(grandTotal);
         }
 
-        // html2pdf Export Logic
         function generatePDF() {
             const element = document.getElementById('invoice-document');
             const invNo = document.getElementById('in-invNo').value || 'Draft';
@@ -423,11 +415,14 @@
                 margin:       0,
                 filename:     `Invoice_${invNo}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
             
-            html2pdf().set(opt).from(element).save();
+            // Add a small delay for mobile rendering to catch up before screenshot
+            setTimeout(() => {
+                html2pdf().set(opt).from(element).save();
+            }, 100);
         }
     </script>
 </body>
