@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Strict viewport tag forces mobile browsers to recognize mobile width immediately -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>Professional Invoice Generator</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,28 +17,36 @@
             overflow: hidden; 
         }
 
-        /* Fixed A4 Pixel Dimensions (Standard 96 DPI A4: 794px x 1123px) */
+        /* Enforce Mobile/Desktop visibility instantly to prevent load glitches */
+        @media (min-width: 1024px) {
+            .mobile-nav-tabs { display: none !important; }
+        }
+        @media (max-width: 1023px) {
+            .mobile-nav-tabs { display: flex !important; }
+        }
+
+        /* Fixed A4 Pixel Dimensions - STRICT height to prevent extra blank pages */
         .invoice-preview {
             width: 794px;
-            min-height: 1123px;
+            height: 1122px; 
+            max-height: 1122px;
+            overflow: hidden; 
             background: #ffffff;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             position: relative;
             font-family: Arial, Helvetica, sans-serif; 
             color: #000;
             box-sizing: border-box; 
-            padding: 50px 60px; /* Standard margins */
+            padding: 50px 60px; 
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
             transform-origin: top center;
         }
 
-        /* Invoice specific styling */
         .text-red-header { color: #ff0000; }
         .border-black-all { border: 1px solid #000; }
 
-        /* Strict table borders */
         .invoice-table {
             width: 100%;
             border-collapse: collapse;
@@ -45,68 +54,29 @@
             font-size: 14px;
         }
         
-        .invoice-table th, 
-        .invoice-table td {
-            border: 1px solid #000;
-            padding: 6px 10px;
-        }
-        
-        .invoice-table th {
-            font-weight: bold;
-            text-align: left;
-            background-color: transparent;
-        }
-        
-        .invoice-table th.text-center, 
-        .invoice-table td.text-center { text-align: center; }
-        
-        .invoice-table th.text-right, 
-        .invoice-table td.text-right { text-align: right; }
+        .invoice-table th, .invoice-table td { border: 1px solid #000; padding: 6px 10px; }
+        .invoice-table th { font-weight: bold; text-align: left; background-color: transparent; }
+        .invoice-table th.text-center, .invoice-table td.text-center { text-align: center; }
+        .invoice-table th.text-right, .invoice-table td.text-right { text-align: right; }
 
-        .totals-label {
-            text-align: right;
-            padding-right: 15px !important;
-            border-left: 1px solid #000;
-            border-right: 1px solid #000;
-        }
+        .totals-label { text-align: right; padding-right: 15px !important; border-left: 1px solid #000; border-right: 1px solid #000; }
 
-        .words-section {
-            display: flex;
-            border: 1px solid #000;
-            border-top: none; 
-            font-size: 14px;
-        }
-        
-        .words-label {
-            font-weight: bold;
-            padding: 6px 10px;
-            border-right: 1px solid #000;
-            white-space: nowrap;
-        }
-        
-        .words-value {
-            padding: 6px 10px;
-            flex-grow: 1;
-        }
+        .words-section { display: flex; border: 1px solid #000; border-top: none; font-size: 14px; }
+        .words-label { font-weight: bold; padding: 6px 10px; border-right: 1px solid #000; white-space: nowrap; }
+        .words-value { padding: 6px 10px; flex-grow: 1; }
 
-        /* Custom scrollbars */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
+        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-        /* Print rules */
         @media print {
             body { overflow: visible !important; background-color: #fff; height: auto !important; }
-            .invoice-preview { box-shadow: none; margin: 0; padding: 10mm; width: 100%; min-height: auto; transform: none !important; }
+            .invoice-preview { box-shadow: none; margin: 0; padding: 10mm; width: 100%; height: auto !important; max-height: none; transform: none !important; }
             aside, nav { display: none !important; }
-            main { padding: 0 !important; background-color: transparent !important; overflow: visible !important;}
+            main { padding: 0 !important; background-color: transparent !important; overflow: visible !important; display: flex !important;}
             #invoice-scaler { width: 100% !important; height: auto !important; }
         }
     </style>
@@ -114,7 +84,7 @@
 <body class="flex flex-col lg:flex-row h-[100dvh]">
 
     <!-- Mobile View Switcher Tabs -->
-    <nav class="lg:hidden flex bg-slate-900 border-b border-slate-800 text-white shrink-0 z-30">
+    <nav class="mobile-nav-tabs bg-slate-900 border-b border-slate-800 text-white shrink-0 z-30 w-full">
         <button id="tab-edit" onclick="switchMobileTab('edit')" class="flex-1 py-3 text-xs font-bold text-center border-b-2 border-blue-500 text-blue-400 flex items-center justify-center gap-1.5">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
             Edit Details
@@ -136,7 +106,6 @@
         </div>
 
         <div class="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-5 bg-slate-50">
-            
             <section class="bg-white p-4 rounded shadow-sm border border-slate-200">
                 <h2 class="text-xs font-bold text-slate-500 uppercase mb-3 tracking-wider">Header Details</h2>
                 <div class="grid grid-cols-2 gap-3">
@@ -193,20 +162,14 @@
 
     <!-- Document Preview Panel -->
     <main id="preview-panel" class="hidden lg:flex flex-1 h-full bg-slate-300 overflow-y-auto overflow-x-hidden p-3 lg:p-8 flex-col items-center custom-scrollbar relative z-10">
-        
-        <!-- Scaler Wrapper: Automatically scales invoice to fit current screen width -->
         <div id="invoice-scaler" class="relative transition-all duration-150 ease-out flex justify-center">
-            
             <div id="invoice-document" class="invoice-preview">
-                
-                <!-- 1. Top Header -->
-                <div class="flex justify-between text-[14px] mb-2">
+                <div class="flex justify-between text-[14px] mb-2 shrink-0">
                     <div>Proprietor: <span id="out-proprietor" class="font-semibold">B. Srinivas</span></div>
                     <div>Mobile: <span id="out-mobile" class="font-semibold">6305322569</span></div>
                 </div>
 
-                <!-- 2. Main Header (Centered) -->
-                <div class="text-center mb-4">
+                <div class="text-center mb-4 shrink-0">
                     <div class="text-[28px] font-bold text-red-header tracking-wide mb-1 leading-none">KISSAN IRRIGATIONS</div>
                     <div class="text-[18px] font-bold text-red-header leading-tight mb-1">(SWIMMING POOL AND FOUNTAINS)</div>
                     <div class="text-[12px]">Injapur, Beside SS School, Hyderabad, Telangana-501510.</div>
@@ -218,8 +181,7 @@
                     </div>
                 </div>
 
-                <!-- 3. Bill To & Invoice Details -->
-                <div class="flex border-black-all text-[14px] mb-4">
+                <div class="flex border-black-all text-[14px] mb-4 shrink-0">
                     <div class="w-1/2 p-2 border-r border-black flex flex-col">
                         <div class="font-bold border-b border-black pb-1 mb-2">BILL TO</div>
                         <div id="out-billTo" class="mt-1 min-h-[20px] font-semibold uppercase"></div>
@@ -230,8 +192,7 @@
                     </div>
                 </div>
 
-                <!-- 4. Table -->
-                <table class="invoice-table">
+                <table class="invoice-table shrink-0">
                     <thead>
                         <tr>
                             <th class="text-center w-[8%]">S.No.</th>
@@ -242,36 +203,26 @@
                             <th class="text-right w-[18%]">Amount</th>
                         </tr>
                     </thead>
-                    <tbody id="out-table-body">
-                        <!-- JS generated rows -->
-                    </tbody>
-                    <tfoot id="out-table-foot">
-                        <!-- JS generated totals -->
-                    </tfoot>
+                    <tbody id="out-table-body"></tbody>
+                    <tfoot id="out-table-foot"></tfoot>
                 </table>
 
-                <!-- 5. Amount in Words -->
-                <div class="words-section">
+                <div class="words-section shrink-0">
                     <div class="words-label">Amount in Words</div>
                     <div class="words-value font-semibold uppercase text-[13px]" id="out-words">Rupees Zero Only</div>
                 </div>
 
-                <!-- 6. Spacer -->
                 <div class="flex-grow"></div>
 
-                <!-- 7. Footer -->
-                <div class="text-center text-[14px] mt-8 mb-4">
+                <div class="text-center text-[14px] mt-8 mb-4 shrink-0">
                     Thank you for your business.
                 </div>
-
             </div>
         </div>
     </main>
 
     <script>
-        let items = [
-            { id: 1, description: '', size: '', qty: 1, rate: 0 }
-        ];
+        let items = [{ id: 1, description: '', size: '', qty: 1, rate: 0 }];
         let nextId = 2;
 
         const formatCurrency = (num) => new Intl.NumberFormat('en-IN').format(num);
@@ -301,26 +252,42 @@
             return "Rupees " + out.replace(/\s+/g, ' ').trim() + " Only";
         }
 
-        // Auto-scale invoice preview to fit screen width
+        // Layout Engine - Ensures correct tabs load immediately
+        function setupInitialLayout() {
+            const isDesktop = window.innerWidth >= 1024;
+            const editorPanel = document.getElementById('editor-panel');
+            const previewPanel = document.getElementById('preview-panel');
+
+            if (isDesktop) {
+                // On Desktop, force both panels to show
+                editorPanel.classList.remove('hidden');
+                previewPanel.classList.remove('hidden');
+                previewPanel.classList.add('flex');
+            } else {
+                // On Mobile, default to "Edit" tab if both are accidentally active
+                if (!editorPanel.classList.contains('hidden') && !previewPanel.classList.contains('hidden')) {
+                    switchMobileTab('edit');
+                }
+            }
+            autoScaleInvoice();
+        }
+
         function autoScaleInvoice() {
             const container = document.getElementById('preview-panel');
             const invoice = document.getElementById('invoice-document');
             const scaler = document.getElementById('invoice-scaler');
-            if (!container || !invoice || !scaler) return;
-
-            // Only scale if preview panel is visible
-            if (container.classList.contains('hidden')) return;
+            if (!container || !invoice || !scaler || container.classList.contains('hidden')) return;
 
             const isDesktop = window.innerWidth >= 1024;
             const horizontalPadding = isDesktop ? 64 : 20;
             const containerWidth = container.clientWidth - horizontalPadding;
-            const baseA4Width = 794; // Exact A4 pixel width
+            const baseA4Width = 794; 
 
             if (containerWidth < baseA4Width) {
                 const scale = Math.max(0.2, containerWidth / baseA4Width);
                 invoice.style.transform = `scale(${scale})`;
                 scaler.style.width = `${baseA4Width * scale}px`;
-                scaler.style.height = `${invoice.offsetHeight * scale}px`;
+                scaler.style.height = `${1122 * scale}px`; 
             } else {
                 invoice.style.transform = 'none';
                 scaler.style.width = 'auto';
@@ -328,7 +295,6 @@
             }
         }
 
-        // Mobile Tab Switcher
         function switchMobileTab(tab) {
             const editorPanel = document.getElementById('editor-panel');
             const previewPanel = document.getElementById('preview-panel');
@@ -350,15 +316,18 @@
                 tabPreview.className = "flex-1 py-3 text-xs font-bold text-center border-b-2 border-blue-500 text-blue-400 flex items-center justify-center gap-1.5";
                 tabEdit.className = "flex-1 py-3 text-xs font-bold text-center border-b-2 border-transparent text-slate-400 hover:text-white flex items-center justify-center gap-1.5";
                 
-                // Allow DOM render then adjust scale
-                setTimeout(autoScaleInvoice, 20);
+                setTimeout(autoScaleInvoice, 10);
             }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             renderFormItems();
             updatePreview();
-            window.addEventListener('resize', autoScaleInvoice);
+            setupInitialLayout(); // Guarantee mobile view sets up correctly on first load
+        });
+
+        window.addEventListener('resize', () => {
+            setupInitialLayout(); 
         });
 
         function addItem() {
@@ -473,14 +442,13 @@
             const scaler = document.getElementById('invoice-scaler');
             const invNo = document.getElementById('in-invNo').value || 'Draft';
             
-            // 1. Temporarily reset CSS scale to 1 to ensure crisp, un-skewed 300 DPI PDF rendering
             const prevTransform = element.style.transform;
             const prevWidth = scaler.style.width;
             const prevHeight = scaler.style.height;
             
             element.style.transform = 'none';
             scaler.style.width = '794px';
-            scaler.style.height = 'auto';
+            scaler.style.height = '1122px';
 
             const opt = {
                 margin:       0,
@@ -490,7 +458,6 @@
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // 2. Export and restore scale after rendering
             html2pdf().set(opt).from(element).save().then(() => {
                 element.style.transform = prevTransform;
                 scaler.style.width = prevWidth;
