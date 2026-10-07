@@ -412,7 +412,7 @@
         function handleItemChange(id, field, value) {
             const item = items.find(i => i.id === id);
             if (item) {
-                if (field === 'qty' || field === 'rate') {
+                if (field === 'rate') {
                     item[field] = value === '' ? 0 : Number(value);
                 } else {
                     item[field] = value;
@@ -440,7 +440,7 @@
                         <input type="text" placeholder="Item Description" value="${item.description}" oninput="handleItemChange(${item.id}, 'description', this.value)" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
                         <div class="grid grid-cols-3 gap-2">
                             <input type="text" placeholder="Size" value="${item.size}" oninput="handleItemChange(${item.id}, 'size', this.value)" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
-                            <input type="number" placeholder="Qty" value="${item.qty}" oninput="handleItemChange(${item.id}, 'qty', this.value)" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
+                            <input type="text" placeholder="Qty" value="${item.qty}" oninput="handleItemChange(${item.id}, 'qty', this.value)" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
                             <input type="number" placeholder="Rate" value="${item.rate}" oninput="handleItemChange(${item.id}, 'rate', this.value)" class="w-full text-sm border border-slate-300 rounded px-3 py-2 outline-none focus:border-blue-500 transition-colors">
                         </div>
                     </div>
@@ -466,7 +466,9 @@
             let itemsTotal = 0;
 
             items.forEach((item, index) => {
-                const amount = item.qty * item.rate;
+                // Extract numeric value from qty string (e.g. "2 pcs" -> 2) for math calculation
+                const numericQty = parseFloat(item.qty) || 0;
+                const amount = numericQty * item.rate;
                 itemsTotal += amount;
                 
                 const tr = document.createElement('tr');
